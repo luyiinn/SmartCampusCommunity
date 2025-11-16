@@ -10,7 +10,8 @@ import java.io.Serializable;
  * @date: 2025/11/03
  **/
 @Data
-public class UsersDTO implements Serializable {
+public class UsersLoginDTO implements Serializable {
+
 
     /**
      * 用户名
@@ -21,5 +22,6 @@ public class UsersDTO implements Serializable {
      * 密码
      */
     private String password;
+
 
 }
