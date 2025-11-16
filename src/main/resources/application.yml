@@ -7,6 +7,16 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+mybatis-plus:
+  configuration:
+    # 下划线转驼峰（默认就是 true，通常保持默认即可）
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      # 全局主键类型，比如自增
+      id-type: auto
+      # 逻辑删除字段名（如果要用逻辑删除功能）
+      logic-delete-field: deleted
 mybatis:
   #mapper配置文件
   mapper-locations: classpath:mapper/*.xml
@@ -22,6 +32,7 @@ scc:
     admin-ttl: 7200000
     # 设置前端传递过来的令牌名称
     admin-token-name: token
+    # 用户端
     user-secret-key: rynn233
     user-ttl: 7200000
-    user-token-name: authentication
+    user-token-name: token
