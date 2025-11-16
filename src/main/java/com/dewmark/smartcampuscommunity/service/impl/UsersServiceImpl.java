@@ -92,8 +92,8 @@ public class UsersServiceImpl implements UsersService {
         Map<String, Object> claims = new HashMap<>();
         claims.put(JwtClaimsConstant.USER_ID, users.getId());
         String token = JwtUtil.createJWT(
-                jwtProperties.getAdminSecretKey(),
-                jwtProperties.getAdminTtl(),
+                jwtProperties.getUserSecretKey(),
+                jwtProperties.getUserTtl(),
                 claims);
         log.info("用户{}登录成功，token{}",users.getUsername(),token);
         UserLoginVO userLoginVO = UserLoginVO.builder()
