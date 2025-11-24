@@ -1,0 +1,68 @@
+package com.dewmark.smartcampuscommunity.controller.user;
+
+import com.dewmark.smartcampuscommunity.constent.MessageConstant;
+import com.dewmark.smartcampuscommunity.exception.DataNotIlegalException;
+import com.dewmark.smartcampuscommunity.pojo.dto.PostQueryDTO;
+import com.dewmark.smartcampuscommunity.pojo.dto.PostSaveDTO;
+import com.dewmark.smartcampuscommunity.pojo.vo.PageVO;
+import com.dewmark.smartcampuscommunity.pojo.vo.PostListVO;
+import com.dewmark.smartcampuscommunity.result.Result;
+import com.dewmark.smartcampuscommunity.service.PostService;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.*;
+
+/**
+ * @description: 帖子板块
+ * @author: dewMark
+ * @date: 2025/11/16
+ **/
+@Slf4j
+@RestController
+@RequestMapping("/api/post")
+public class PostController {
+
+    private final PostService postService;
+    @Autowired
+    public PostController(PostService postService) {
+        this.postService = postService;
+    }
+
+
+    /**
+     * 新增帖子
+     * @param postSaveDTO
+     * @return com.dewmark.smartcampuscommunity.result.Result
+     * @author dewMark
+     * @create 16/11/2025
+     **/
+    @PostMapping("/add")
+    public Result savePost(@RequestBody PostSaveDTO postSaveDTO) {
+        if (postSaveDTO == null) {
+            throw new DataNotIlegalException(MessageConstant.DATA_UNILEGAL);
+        }
+        log.info("发布帖子: {}", postSaveDTO);
+        postService.savePost(postSaveDTO);
+        return Result.success();
+    }
+
+    /**
+     * 帖子条件分页查询
+     * @param postQueryDTO
+     * @return com.dewmark.smartcampuscommunity.result.Result<com.dewmark.smartcampuscommunity.pojo.vo.PageVO<com.dewmark.smartcampuscommunity.pojo.vo.PostListVO>>
+     * @author dewMark
+     * @create 16/11/2025
+     **/
+    @GetMapping("/list")
+    public Result<PageVO<PostListVO>> getPostList(PostQueryDTO postQueryDTO) {
+
+        if (postQueryDTO == null) {
+            throw new DataNotIlegalException(MessageConstant.DATA_UNILEGAL);
+        }
+
+        PageVO<PostListVO> postlist = postService.page(postQueryDTO);
+
+        return Result.success(postlist);
+    }
+
+}

@@ -7,6 +7,11 @@ spring:
   mvc:
     pathmatch:
       matching-strategy: ant_path_matcher
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 50MB
 mybatis-plus:
   configuration:
     # 下划线转驼峰（默认就是 true，通常保持默认即可）
@@ -26,10 +31,16 @@ mybatis:
     map-underscore-to-camel-case: true
 scc:
   jwt:
+#    adminSecretKey: dewmark      # 改为驼峰命名
+#    adminTtl: 7200000
+#    adminTokenName: token
+#    userSecretKey: rynn233       # 改为驼峰命名
+#    userTtl: 7200000
+#    userTokenName: token
     # 设置jwt签名加密时使用的秘钥
     admin-secret-key: dewmark
     # 设置jwt过期时间
-    admin-ttl: 7200000
+    admin-ttl: 604800000
     # 设置前端传递过来的令牌名称
     admin-token-name: token
     # 用户端

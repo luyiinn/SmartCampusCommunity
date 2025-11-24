@@ -13,6 +13,8 @@ public class MessageConstant {
     public static final String USER_NOT_LOGIN = "用户未登录";
     public static final String LOGIN_FAILED = "登录失败";
     public static final String PASSWORD_EDIT_FAILED = "密码修改失败";
+    public static final String DATA_UNILEGAL = "数据不合法";
+    public static final String DATABASE_OPRATE = "数据库操作失败";
 
 
 }
