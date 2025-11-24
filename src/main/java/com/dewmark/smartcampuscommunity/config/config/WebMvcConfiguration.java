@@ -12,6 +12,7 @@ import org.springframework.http.converter.json.MappingJackson2HttpMessageConvert
 import org.springframework.web.servlet.config.annotation.InterceptorRegistry;
 import org.springframework.web.servlet.config.annotation.ResourceHandlerRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurationSupport;
+import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 import springfox.documentation.builders.ApiInfoBuilder;
 import springfox.documentation.builders.PathSelectors;
 import springfox.documentation.builders.RequestHandlerSelectors;
@@ -26,7 +27,7 @@ import java.util.List;
  */
 @Configuration
 @Slf4j
-public class WebMvcConfiguration extends WebMvcConfigurationSupport {
+public class WebMvcConfiguration implements WebMvcConfigurer {
 
 
     @Autowired
@@ -37,15 +38,31 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
      *
      * @param registry
      */
-    protected void addInterceptors(InterceptorRegistry registry) {
+//    protected void addInterceptors(InterceptorRegistry registry) {
+//        log.info("开始注册自定义拦截器...");
+////        registry.addInterceptor(jwtTokenAdminInterceptor)
+////                .addPathPatterns("/admin/**")
+////                .excludePathPatterns("/admin/employee/login");
+//        registry.addInterceptor(jwtTokenUserInterceptor)
+//                .addPathPatterns("/api/**")
+//                .excludePathPatterns("/api/user/login")
+//                .excludePathPatterns("/api/tag/**")
+//                .excludePathPatterns("/api/upload/**")
+//                .excludePathPatterns("/uploads/**")
+//                .excludePathPatterns("/api/user/regis");
+//    }
+    @Override
+    public void addInterceptors(InterceptorRegistry registry) {
         log.info("开始注册自定义拦截器...");
-//        registry.addInterceptor(jwtTokenAdminInterceptor)
-//                .addPathPatterns("/admin/**")
-//                .excludePathPatterns("/admin/employee/login");
         registry.addInterceptor(jwtTokenUserInterceptor)
                 .addPathPatterns("/api/**")
-                .excludePathPatterns("/api/user/login")
-                .excludePathPatterns("/api/user/regis");
+                .excludePathPatterns(
+                        "/api/user/login",
+                        "/api/tag/**",
+                        "/api/upload/**",
+                        "/uploads/**",        // ← 保留这个排除
+                        "/api/user/regis"
+                );
     }
 
 //    /**
@@ -88,27 +105,37 @@ public class WebMvcConfiguration extends WebMvcConfigurationSupport {
 //        return docket;
 //    }
 
-//    /**
-//     * 设置静态资源映射
-//     * @param registry
-//     */
-//    protected void addResourceHandlers(ResourceHandlerRegistry registry) {
-//        log.info("开始静态资源映射...");
-//        registry.addResourceHandler("/doc.html").addResourceLocations("classpath:/META-INF/resources/");
-//        registry.addResourceHandler("/webjars/**").addResourceLocations("classpath:/META-INF/resources/webjars/");
-//    }
+    @Override
+    public void addResourceHandlers(ResourceHandlerRegistry registry) {
+        log.info("注册静态资源映射：/uploads/** 和 Swagger 资源");
+        // 1. 你的上传文件目录
+        registry.addResourceHandler("/uploads/**")
+                .addResourceLocations("file:uploads/");
+
+//        // 2. Swagger UI（如果你启用的话）
+//        registry.addResourceHandler("/doc.html")
+//                .addResourceLocations("classpath:/META-INF/resources/");
+//        registry.addResourceHandler("/webjars/**")
+//                .addResourceLocations("classpath:/META-INF/resources/webjars/");
+    }
 
     /**
      * 扩展Spring MVC 消息转化器
      * @param converters
      */
-    protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
-        //创建消息转换器对象
+//    protected void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
+//        //创建消息转换器对象
+//        MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
+//        //为消息转化器设置一个对象转化器，对象转化器可以将java对象序列化为JSON数据
+//        converter.setObjectMapper(new JacksonObjectMapper());
+//        //将自己的消息转化器交给容器
+//        converters.add(0,converter);
+//
+//    }
+    @Override
+    public void extendMessageConverters(List<HttpMessageConverter<?>> converters) {
         MappingJackson2HttpMessageConverter converter = new MappingJackson2HttpMessageConverter();
-        //为消息转化器设置一个对象转化器，对象转化器可以将java对象序列化为JSON数据
         converter.setObjectMapper(new JacksonObjectMapper());
-        //将自己的消息转化器交给容器
-        converters.add(0,converter);
-
+        converters.add(0, converter);
     }
 }
