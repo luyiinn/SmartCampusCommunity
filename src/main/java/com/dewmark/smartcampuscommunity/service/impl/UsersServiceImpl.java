@@ -100,8 +100,15 @@ public class UsersServiceImpl implements UsersService {
                 .id(users.getId())
                 .userName(users.getUsername())
                 .token(token)
+                .avatar(users.getAvatar())
                 .build();
 
         return userLoginVO;
+    }
+
+    @Override
+    public Users findByUserId(Long id) {
+        Users users = usersMapper.selectById(id);
+        return users;
     }
 }

@@ -32,6 +32,11 @@ public class Users implements Serializable {
     private String username;
 
     /**
+     * 用户头像
+     */
+    private String avatar;
+
+    /**
      * 密码
      */
     private String password;
