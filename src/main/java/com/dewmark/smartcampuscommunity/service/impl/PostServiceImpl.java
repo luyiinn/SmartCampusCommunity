@@ -151,4 +151,19 @@ public class PostServiceImpl implements PostService {
         return new PageVO<>(total, postListVOS);
 
     }
+
+
+    /**
+     * 评论数+1
+     * @return void
+     * @author dewMark
+     * @create 24/11/2025
+     **/
+    @Override
+    public void commentCountUp(Long id) {
+        Integer i = postMapper.commentCountUp(id);
+        if (i != 1){
+            throw new BaseException(MessageConstant.DATABASE_OPRATE);
+        }
+    }
 }

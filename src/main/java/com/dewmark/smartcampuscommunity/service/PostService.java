@@ -9,4 +9,6 @@ public interface PostService{
     void savePost(PostSaveDTO postSaveDTO);
 
     PageVO<PostListVO> page(PostQueryDTO postQueryDTO);
+
+    void commentCountUp(Long id);
 }

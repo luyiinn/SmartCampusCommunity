@@ -7,6 +7,7 @@ import com.dewmark.smartcampuscommunity.pojo.vo.PostListVO;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -18,5 +19,6 @@ public interface PostMapper extends BaseMapper<Post> {
 
     List<PostListVO> selectPostListWithSummary(PostQueryBO queryBO);
 
-
+    @Update("UPDATE post SET comment_count = comment_count + 1 WHERE id = #{id}")
+    Integer commentCountUp(Long id);
 }
