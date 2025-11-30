@@ -70,4 +70,9 @@ public class PostListVO {
      * 标签列表
      */
     private List<String> tags;
+
+    /**
+     * 当前用户是否点赞
+     */
+    private Integer isLike;
 }

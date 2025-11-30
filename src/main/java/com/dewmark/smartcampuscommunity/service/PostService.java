@@ -11,4 +11,6 @@ public interface PostService{
     PageVO<PostListVO> page(PostQueryDTO postQueryDTO);
 
     void commentCountUp(Long id);
+
+    void setLike(Long id);
 }

@@ -78,13 +78,21 @@ public class CommentServiceImpl implements CommentService {
          // 为CommentVO补充用户名，用户头像
          comments.forEach(comment -> {
             Users users = usersMapper.selectById(comment.getUserId());
-            CommentVO commentVO
+             Long replyUserId = comment.getReplyUserId();
+
+             CommentVO commentVO
                     = new CommentVO()
                     .builder()
                     .avatar(users.getAvatar())
                     .userName(users.getUsername())
                     .build();
             BeanUtils.copyProperties(comment, commentVO);
+
+            if (replyUserId != null) {
+                String replyUsername = usersMapper.selectById(replyUserId).getUsername();
+                commentVO.setReplyUserName(replyUsername);
+            }
+
             commentVOList.add(commentVO);
         });
 

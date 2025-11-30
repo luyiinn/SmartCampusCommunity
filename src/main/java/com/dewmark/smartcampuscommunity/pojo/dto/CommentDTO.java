@@ -28,7 +28,7 @@ public class CommentDTO {
     /**
      * 回复评论id
      **/
-    private String replyCommentId;
+    private Long replyCommentId;
 
     /**
      * 是否匿名

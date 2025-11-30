@@ -43,6 +43,9 @@ public class CommentVO {
     /** 被回复用户的ID，当 reply_comment_id 不为空时该字段有效 */
     private Long replyUserId;
 
+    /** 回复用户名 */
+    private String replyUserName;
+
     /** 评论创建时间 */
     private LocalDateTime createAt;
 

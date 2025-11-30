@@ -45,5 +45,5 @@ scc:
     admin-token-name: token
     # 用户端
     user-secret-key: rynn233
-    user-ttl: 7200000
+    user-ttl: 604800000
     user-token-name: token

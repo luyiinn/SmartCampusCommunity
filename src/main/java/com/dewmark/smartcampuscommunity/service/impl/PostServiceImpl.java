@@ -7,11 +7,13 @@ import com.dewmark.smartcampuscommunity.exception.BaseException;
 import com.dewmark.smartcampuscommunity.mapper.PostMapper;
 import com.dewmark.smartcampuscommunity.mapper.PostTagMapper;
 import com.dewmark.smartcampuscommunity.mapper.TagMapper;
+import com.dewmark.smartcampuscommunity.mapper.UserPostLikeMapper;
 import com.dewmark.smartcampuscommunity.pojo.bo.PostQueryBO;
 import com.dewmark.smartcampuscommunity.pojo.dto.PostQueryDTO;
 import com.dewmark.smartcampuscommunity.pojo.dto.PostSaveDTO;
 import com.dewmark.smartcampuscommunity.pojo.entity.Post;
 import com.dewmark.smartcampuscommunity.pojo.entity.PostTag;
+import com.dewmark.smartcampuscommunity.pojo.entity.UserPostLike;
 import com.dewmark.smartcampuscommunity.pojo.entity.Users;
 import com.dewmark.smartcampuscommunity.pojo.vo.PageVO;
 import com.dewmark.smartcampuscommunity.pojo.vo.PostListVO;
@@ -42,18 +44,21 @@ public class PostServiceImpl implements PostService {
     private final PostTagService postTagService;
     private final TagMapper tagMapper;
     private final UsersService usersService;
+    private final UserPostLikeMapper userPostLikeMapper;
     @Autowired
     public PostServiceImpl(
             PostMapper postMapper,
             PostTagMapper postTagMapper,
             PostTagService postTagService,
             TagMapper tagMapper,
-            UsersService usersService) {
+            UsersService usersService,
+            UserPostLikeMapper userPostLikeMapper) {
         this.postMapper = postMapper;
         this.postTagMapper = postTagMapper;
         this.postTagService = postTagService;
         this.tagMapper = tagMapper;
         this.usersService = usersService;
+        this.userPostLikeMapper = userPostLikeMapper;
     }
 
     /**
@@ -141,11 +146,21 @@ public class PostServiceImpl implements PostService {
             vo.setTags(tagMapper.selectTagNamesByPostId(vo.getId()));
         }
 
-        // 为每个帖子查询用户头像和名称
+
+
+        // 为每个帖子查询用户头像和名称，以及是否已点赞
         postListVOS.forEach(postListVO -> {
             Users user = usersService.findByUserId(postListVO.getUserId());
             postListVO.setUserName(user.getUsername());
             postListVO.setAvatar(user.getAvatar());
+            Integer isLike = 0;
+            List<UserPostLike> exist = userPostLikeMapper.isExist(BaseContext.getCurrentId(), postListVO.getId());
+            if (exist != null && !exist.isEmpty()) {
+                if (exist.get(0).getLikeStatus() == 1){
+                    isLike = 1;
+                }
+            }
+            postListVO.setIsLike(isLike);
         });
 
         return new PageVO<>(total, postListVOS);
@@ -164,6 +179,79 @@ public class PostServiceImpl implements PostService {
         Integer i = postMapper.commentCountUp(id);
         if (i != 1){
             throw new BaseException(MessageConstant.DATABASE_OPRATE);
+        }
+    }
+
+    /**
+     * 点赞OR取消点赞
+     * @return void
+     * @author dewMark
+     * @create 27/11/2025
+     **/
+    @Override
+    @Transactional
+    public void setLike(Long postId) {
+        Long userId = BaseContext.getCurrentId();
+        Post post = postMapper.selectById(postId);
+
+        // 查询用户的点赞记录
+        List<UserPostLike> userPostLikes = userPostLikeMapper.isExist(userId, postId);
+
+        // 判断是否存在记录
+        boolean isExist = userPostLikes != null && !userPostLikes.isEmpty();
+
+        if (isExist) {
+            // 存在记录，获取最新记录的状态
+            UserPostLike latestRecord = userPostLikes.get(0);
+            Integer currentStatus = latestRecord.getLikeStatus();
+
+            if (currentStatus == 1) {
+                // 当前是点赞状态，执行取消点赞
+                UserPostLike updateEntity = UserPostLike.builder()
+                        .id(latestRecord.getId())
+                        .likeStatus(0)
+                        .updatedAt(LocalDateTime.now())
+                        .build();
+                userPostLikeMapper.updateById(updateEntity);
+
+                // 帖子点赞数+1
+                postMapper.updateById(new Post()
+                                .builder()
+                                .id(postId)
+                                .likeCount(post.getLikeCount() - 1)
+                                .build());
+
+            } else {
+                // 当前是取消点赞状态，执行重新点赞
+                UserPostLike updateEntity = UserPostLike.builder()
+                        .id(latestRecord.getId())
+                        .likeStatus(1)
+                        .updatedAt(LocalDateTime.now())
+                        .build();
+                userPostLikeMapper.updateById(updateEntity);
+                // 帖子点赞数-1
+                postMapper.updateById(new Post()
+                        .builder()
+                        .id(postId)
+                        .likeCount(post.getLikeCount() + 1)
+                        .build());
+            }
+        } else {
+            // 不存在记录，创建新的点赞记录
+            UserPostLike newEntity = UserPostLike.builder()
+                    .postId(postId)
+                    .userId(userId)
+                    .likeStatus(1)
+                    .createdAt(LocalDateTime.now())
+                    .updatedAt(LocalDateTime.now())
+                    .build();
+            userPostLikeMapper.insert(newEntity);
+            // 帖子点赞数+1
+            postMapper.updateById(new Post()
+                    .builder()
+                    .id(postId)
+                    .likeCount(post.getLikeCount() + 1)
+                    .build());
         }
     }
 }

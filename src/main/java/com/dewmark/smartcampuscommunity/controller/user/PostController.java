@@ -1,6 +1,7 @@
 package com.dewmark.smartcampuscommunity.controller.user;
 
 import com.dewmark.smartcampuscommunity.constent.MessageConstant;
+import com.dewmark.smartcampuscommunity.context.BaseContext;
 import com.dewmark.smartcampuscommunity.exception.DataNotIlegalException;
 import com.dewmark.smartcampuscommunity.pojo.dto.PostQueryDTO;
 import com.dewmark.smartcampuscommunity.pojo.dto.PostSaveDTO;
@@ -63,6 +64,26 @@ public class PostController {
         PageVO<PostListVO> postlist = postService.page(postQueryDTO);
 
         return Result.success(postlist);
+    }
+
+
+    /**
+     * 用户点赞or取消点赞
+     * @param postId
+     * @return com.dewmark.smartcampuscommunity.result.Result
+     * @author dewMark
+     * @create 27/11/2025
+     **/
+    @PutMapping("/like/{postId}")
+    public Result setLike(@PathVariable Long postId){
+        if (postId == null) {
+            throw new DataNotIlegalException(MessageConstant.DATA_UNILEGAL);
+        }
+        log.info("用户：{}，点赞OR取消点赞帖子：{}", BaseContext.getCurrentId(),postId);
+
+        postService.setLike(postId);
+
+        return Result.success();
     }
 
 }
