@@ -5,21 +5,20 @@ import com.dewmark.smartcampuscommunity.pojo.dto.UsersRegisterDTO;
 import com.dewmark.smartcampuscommunity.pojo.vo.UserLoginVO;
 import com.dewmark.smartcampuscommunity.result.Result;
 import com.dewmark.smartcampuscommunity.service.UsersService;
-import io.swagger.annotations.Api;
-import io.swagger.annotations.ApiOperation;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
 /**
  * @description:
  * @author: dewMark
  * @date: 2025/11/03
  **/
-@Api(tags = "用户相关接口")
 @Slf4j
 @RestController
 @RequestMapping("/api/user")
@@ -38,7 +37,6 @@ public class UserController {
      * @author dewMark
      * @create 3/11/2025
      **/
-    @ApiOperation("用户注册")
     @PostMapping("/regis")
     public Result register(@RequestBody UsersRegisterDTO usersRegisterDTO) {
         log.info("用户注册{}",usersRegisterDTO);
