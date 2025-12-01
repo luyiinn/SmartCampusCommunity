@@ -6,6 +6,7 @@ import com.dewmark.smartcampuscommunity.exception.DataNotIlegalException;
 import com.dewmark.smartcampuscommunity.pojo.dto.PostQueryDTO;
 import com.dewmark.smartcampuscommunity.pojo.dto.PostSaveDTO;
 import com.dewmark.smartcampuscommunity.pojo.vo.PageVO;
+import com.dewmark.smartcampuscommunity.pojo.vo.PostDetailVO;
 import com.dewmark.smartcampuscommunity.pojo.vo.PostListVO;
 import com.dewmark.smartcampuscommunity.result.Result;
 import com.dewmark.smartcampuscommunity.service.PostService;
@@ -63,6 +64,7 @@ public class PostController {
 
         PageVO<PostListVO> postlist = postService.page(postQueryDTO);
 
+        log.info("测试图片显示{}",Result.success(postlist));
         return Result.success(postlist);
     }
 
@@ -84,6 +86,23 @@ public class PostController {
         postService.setLike(postId);
 
         return Result.success();
+    }
+
+    /**
+     * 帖子详情
+     * @param postId
+     * @return com.dewmark.smartcampuscommunity.result.Result<com.dewmark.smartcampuscommunity.pojo.vo.PostDetailVO>
+     * @author dewMark
+     * @create 1/12/2025
+     **/
+    @GetMapping("/detail/{postId}")
+    public Result<PostDetailVO> showDetail(@PathVariable Long postId){
+        log.info("展示帖子{}的详细内容",postId);
+        if (postId == null) {
+            throw new DataNotIlegalException(MessageConstant.DATA_UNILEGAL);
+        }
+        PostDetailVO postDetailVO = postService.showDetail(postId);
+        return Result.success(postDetailVO);
     }
 
 }

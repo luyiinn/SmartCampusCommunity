@@ -11,18 +11,14 @@ import com.dewmark.smartcampuscommunity.mapper.UserPostLikeMapper;
 import com.dewmark.smartcampuscommunity.pojo.bo.PostQueryBO;
 import com.dewmark.smartcampuscommunity.pojo.dto.PostQueryDTO;
 import com.dewmark.smartcampuscommunity.pojo.dto.PostSaveDTO;
-import com.dewmark.smartcampuscommunity.pojo.entity.Post;
-import com.dewmark.smartcampuscommunity.pojo.entity.PostTag;
-import com.dewmark.smartcampuscommunity.pojo.entity.UserPostLike;
-import com.dewmark.smartcampuscommunity.pojo.entity.Users;
+import com.dewmark.smartcampuscommunity.pojo.entity.*;
 import com.dewmark.smartcampuscommunity.pojo.vo.PageVO;
+import com.dewmark.smartcampuscommunity.pojo.vo.PostDetailVO;
 import com.dewmark.smartcampuscommunity.pojo.vo.PostListVO;
-import com.dewmark.smartcampuscommunity.service.PostService;
-import com.dewmark.smartcampuscommunity.service.PostTagService;
-import com.dewmark.smartcampuscommunity.service.TagService;
-import com.dewmark.smartcampuscommunity.service.UsersService;
+import com.dewmark.smartcampuscommunity.service.*;
 import com.dewmark.smartcampuscommunity.utils.JwtUtil;
 import com.fasterxml.jackson.databind.JsonSerializable;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -30,6 +26,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @description: PostService实现类
@@ -45,6 +42,7 @@ public class PostServiceImpl implements PostService {
     private final TagMapper tagMapper;
     private final UsersService usersService;
     private final UserPostLikeMapper userPostLikeMapper;
+    private final PostImageService postImageService;
     @Autowired
     public PostServiceImpl(
             PostMapper postMapper,
@@ -52,13 +50,15 @@ public class PostServiceImpl implements PostService {
             PostTagService postTagService,
             TagMapper tagMapper,
             UsersService usersService,
-            UserPostLikeMapper userPostLikeMapper) {
+            UserPostLikeMapper userPostLikeMapper,
+            PostImageService postImageService) {
         this.postMapper = postMapper;
         this.postTagMapper = postTagMapper;
         this.postTagService = postTagService;
         this.tagMapper = tagMapper;
         this.usersService = usersService;
         this.userPostLikeMapper = userPostLikeMapper;
+        this.postImageService = postImageService;
     }
 
     /**
@@ -114,6 +114,20 @@ public class PostServiceImpl implements PostService {
         postSaveDTO.getTags().forEach(tagId->{
             tagMapper.useCountUp(tagId);
         });
+
+        List<String> images = postSaveDTO.getImages();
+        if (images != null && !images.isEmpty()) {
+            List<PostImage> pis = images.stream().map(imagePath -> {
+                PostImage postImage = new PostImage();
+                postImage.setPostId(postId);
+                postImage.setImagePath(imagePath);
+                postImage.setCreatedAt(LocalDateTime.now());
+                return postImage;
+            }).collect(Collectors.toList());
+
+            postImageService.saveBatch(pis);
+        }
+
     }
 
     /**
@@ -161,6 +175,13 @@ public class PostServiceImpl implements PostService {
                 }
             }
             postListVO.setIsLike(isLike);
+        });
+
+        // 为每个帖子查询图片
+        postListVOS.forEach(postListVO -> {
+            postListVO.setImages(postImageService.find(postListVO.getId()).stream().map(postImage -> {
+                return postImage.getImagePath();
+            }).collect(Collectors.toList()));
         });
 
         return new PageVO<>(total, postListVOS);
@@ -253,5 +274,13 @@ public class PostServiceImpl implements PostService {
                     .likeCount(post.getLikeCount() + 1)
                     .build());
         }
+    }
+
+    @Override
+    public PostDetailVO showDetail(Long postId) {
+        PostDetailVO postDetailVO = new PostDetailVO();
+        Post post = postMapper.selectById(postId);
+        BeanUtils.copyProperties(post,postDetailVO);
+        return null;
     }
 }

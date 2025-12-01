@@ -40,4 +40,9 @@ public class PostSaveDTO {
      * 标签列表
      **/
     private List<Long> tags;
+
+    /**
+     * 图片列表
+     **/
+    private  List<String> images;
 }

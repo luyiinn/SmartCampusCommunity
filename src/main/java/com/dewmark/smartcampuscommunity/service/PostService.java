@@ -3,6 +3,7 @@ package com.dewmark.smartcampuscommunity.service;
 import com.dewmark.smartcampuscommunity.pojo.dto.PostQueryDTO;
 import com.dewmark.smartcampuscommunity.pojo.dto.PostSaveDTO;
 import com.dewmark.smartcampuscommunity.pojo.vo.PageVO;
+import com.dewmark.smartcampuscommunity.pojo.vo.PostDetailVO;
 import com.dewmark.smartcampuscommunity.pojo.vo.PostListVO;
 
 public interface PostService{
@@ -13,4 +14,6 @@ public interface PostService{
     void commentCountUp(Long id);
 
     void setLike(Long id);
+
+    PostDetailVO showDetail(Long postId);
 }
