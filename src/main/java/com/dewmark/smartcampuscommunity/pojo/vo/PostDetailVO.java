@@ -1,5 +1,10 @@
 package com.dewmark.smartcampuscommunity.pojo.vo;
 
+import lombok.AllArgsConstructor;
+import lombok.Builder;
+import lombok.Data;
+import lombok.NoArgsConstructor;
+
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -8,6 +13,10 @@ import java.util.List;
  * @author: dewMark
  * @date: 2025/12/01
  **/
+@Data
+@AllArgsConstructor
+@NoArgsConstructor
+@Builder
 public class PostDetailVO {
     /**
      * 帖子ID

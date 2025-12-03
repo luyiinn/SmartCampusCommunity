@@ -276,11 +276,53 @@ public class PostServiceImpl implements PostService {
         }
     }
 
+    /**
+     * 展示帖子详情
+     * @param postId
+     * @return com.dewmark.smartcampuscommunity.pojo.vo.PostDetailVO
+     * @author dewMark
+     * @create 1/12/2025
+     **/
     @Override
     public PostDetailVO showDetail(Long postId) {
-        PostDetailVO postDetailVO = new PostDetailVO();
         Post post = postMapper.selectById(postId);
+        // 查找用户用于查找用户名与头像
+        Users users = usersService.findByUserId(post.getUserId());
+        // 查找帖子下标签
+        List<String> tags = tagMapper.selectTagNamesByPostId(postId);
+        // 查找图片集合
+        List<String> images = postImageService.find(postId).stream().map(postImage -> {
+            return postImage.getImagePath();
+        }).collect(Collectors.toList());
+
+        PostDetailVO postDetailVO
+                = new PostDetailVO()
+                .builder()
+                .id(postId)
+                .avatar(users.getAvatar())
+                .userName(users.getUsername())
+                .images(images)
+                .tags(tags)
+                .build();
         BeanUtils.copyProperties(post,postDetailVO);
-        return null;
+
+        // 点赞关系
+        // 确认非空再判点赞
+        // 确认为空未点赞
+        Integer currentStatus;
+        List<UserPostLike> userPostLikes = userPostLikeMapper.isExist(BaseContext.getCurrentId(), postId);
+        if (userPostLikes != null && !userPostLikes.isEmpty()) {
+            UserPostLike latestRecord = userPostLikes.get(0);
+            currentStatus = latestRecord.getLikeStatus();
+        }else {
+            currentStatus = 0;
+        }
+        postDetailVO.setIsLike(currentStatus);
+
+        // 对应帖子浏览数+1
+        post.setViewCount(post.getViewCount() + 1);
+        postMapper.updateById(post);
+
+        return postDetailVO;
     }
 }
