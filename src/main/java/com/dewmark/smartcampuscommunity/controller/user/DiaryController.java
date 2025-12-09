@@ -2,7 +2,10 @@ package com.dewmark.smartcampuscommunity.controller.user;
 
 import com.dewmark.smartcampuscommunity.constent.MessageConstant;
 import com.dewmark.smartcampuscommunity.exception.DataNotIlegalException;
+import com.dewmark.smartcampuscommunity.pojo.dto.DiaryQueryDTO;
 import com.dewmark.smartcampuscommunity.pojo.vo.DiaryDateVO;
+import com.dewmark.smartcampuscommunity.pojo.vo.DiaryListVO;
+import com.dewmark.smartcampuscommunity.pojo.vo.PageVO;
 import com.dewmark.smartcampuscommunity.result.Result;
 import com.dewmark.smartcampuscommunity.service.DiaryService;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +49,26 @@ public class DiaryController {
         DiaryDateVO diaryDateVO = diaryService.getDate(year);
 
         return Result.success(diaryDateVO);
+    }
+
+    /**
+     * 获取日志分页列表
+     * @param diaryQueryDTO
+     * @return com.dewmark.smartcampuscommunity.result.Result<com.dewmark.smartcampuscommunity.pojo.vo.PageVO<com.dewmark.smartcampuscommunity.pojo.vo.DiaryListVO>>
+     * @author dewMark
+     * @create 8/12/2025
+     **/
+    @GetMapping("/list")
+    public Result<PageVO<DiaryListVO>> getDiaryList(DiaryQueryDTO diaryQueryDTO){
+        log.info("查看用户日志列表，{}",diaryQueryDTO);
+
+        if (diaryQueryDTO == null || diaryQueryDTO.equals("")){
+            throw new DataNotIlegalException(MessageConstant.DATA_UNILEGAL);
+        }
+
+        PageVO<DiaryListVO> list = diaryService.getListByUser(diaryQueryDTO);
+
+        return Result.success(list);
     }
 
 }
