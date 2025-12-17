@@ -1,0 +1,49 @@
+spring:
+  datasource:
+    url: jdbc:mysql://localhost:3306/smart_campus_community
+    username: root
+    password: 123456
+    driver-class-name: com.mysql.cj.jdbc.Driver
+  mvc:
+    pathmatch:
+      matching-strategy: ant_path_matcher
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 10MB
+      max-request-size: 50MB
+mybatis-plus:
+  configuration:
+    # 下划线转驼峰（默认就是 true，通常保持默认即可）
+    map-underscore-to-camel-case: true
+  global-config:
+    db-config:
+      # 全局主键类型，比如自增
+      id-type: auto
+      # 逻辑删除字段名（如果要用逻辑删除功能）
+      logic-delete-field: deleted
+mybatis:
+  #mapper配置文件
+  mapper-locations: classpath:mapper/*.xml
+  type-aliases-package: com.smartcampuscommunity.pojo.entity
+  configuration:
+    #开启驼峰命名
+    map-underscore-to-camel-case: true
+scc:
+  jwt:
+#    adminSecretKey: dewmark      # 改为驼峰命名
+#    adminTtl: 7200000
+#    adminTokenName: token
+#    userSecretKey: rynn233       # 改为驼峰命名
+#    userTtl: 7200000
+#    userTokenName: token
+    # 设置jwt签名加密时使用的秘钥
+    admin-secret-key: dewmark
+    # 设置jwt过期时间
+    admin-ttl: 604800000
+    # 设置前端传递过来的令牌名称
+    admin-token-name: token
+    # 用户端
+    user-secret-key: When you have eliminated the impossible, whatever remains, however improbable, must be the truth.
+    user-ttl: 604800000
+    user-token-name: token

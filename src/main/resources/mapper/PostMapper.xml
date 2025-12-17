@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dewmark.smartcampuscommunity.mapper.PostMapper">
+
+
+    <select id="selectPostCount" resultType="java.lang.Long">
+        SELECT COUNT(DISTINCT p.id)
+        FROM post p
+        <if test="tagId != null">
+            INNER JOIN post_tag pt ON p.id = pt.post_id AND pt.tag_id = #{tagId}
+        </if>
+        WHERE p.is_deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (p.title LIKE CONCAT('%', #{keyword}, '%') OR p.content LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="userId != null">
+            AND p.user_id = #{userId}
+        </if>
+        <if test="status != null">
+            AND p.status = #{status}
+        </if>
+    </select>
+
+    <select id="selectPostListWithSummary" resultType="com.dewmark.smartcampuscommunity.pojo.vo.PostListVO">
+        SELECT
+        p.id,
+        p.user_id as userId,
+        p.title,
+        CASE
+        WHEN LENGTH(p.content) > 100 THEN CONCAT(SUBSTRING(p.content, 1, 100), '...')
+        ELSE p.content
+        END as contentSummary,
+        p.is_anonymous as isAnonymous,
+        p.status,
+        p.view_count as viewCount,
+        p.like_count as likeCount,
+        p.comment_count as commentCount,
+        p.created_at as createdAt
+        FROM post p
+        <if test="tagId != null">
+            INNER JOIN post_tag pt ON p.id = pt.post_id AND pt.tag_id = #{tagId}
+        </if>
+        WHERE p.is_deleted = 0
+        <if test="keyword != null and keyword != ''">
+            AND (p.title LIKE CONCAT('%', #{keyword}, '%') OR p.content LIKE CONCAT('%', #{keyword}, '%'))
+        </if>
+        <if test="userId != null">
+            AND p.user_id = #{userId}
+        </if>
+        <if test="status != null">
+            AND p.status = #{status}
+        </if>
+        ORDER BY p.created_at DESC
+        LIMIT #{offset}, #{limit}
+    </select>
+</mapper>
