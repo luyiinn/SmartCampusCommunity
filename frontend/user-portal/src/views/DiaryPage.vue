@@ -1,18 +1,33 @@
 <template>
   <div class="square-page">
     <div class="square-header">
-      <h1>个人日志</h1>
-      <p class="subtitle">记录每日写作情况与日志列表</p>
+      <div class="header-content">
+        <h1>个人日志</h1>
+        <p class="subtitle">记录每日写作情况与日志列表</p>
+      </div>
+      <el-button type="primary" class="publish-btn" @click="showPublishDialog"
+        >发布日志</el-button
+      >
     </div>
 
     <!-- 日志热力图日历 -->
     <HeatmapCalendar :hasDataDates="hasDataDates" @update:year="updateYear" />
 
     <div class="diary-list-container">
-      <DiaryList :items="diaryList" :loading="loading" :has-more="hasMore" :loading-more="loadingMore"
-        @search="handleSearch" @load-more="handleLoadMore" @select="handleSelectDiary"
-        @update:like-status="handleLikeStatusUpdate" />
+      <DiaryList
+        :items="diaryList"
+        :loading="loading"
+        :has-more="hasMore"
+        :loading-more="loadingMore"
+        @search="handleSearch"
+        @load-more="handleLoadMore"
+        @select="handleSelectDiary"
+        @update:like-status="handleLikeStatusUpdate"
+      />
     </div>
+
+    <!-- 发布日志对话框 -->
+    <DiaryPublishDialog v-model:visible="publishDialogVisible" />
   </div>
 </template>
 
@@ -21,6 +36,7 @@ import { ref, watch, onMounted } from "vue";
 import { useRoute } from "vue-router";
 import HeatmapCalendar from "../components/HeatmapCalendar.vue";
 import DiaryList from "../components/DiaryList.vue";
+import DiaryPublishDialog from "../components/DiaryPublishDialog.vue";
 import type { DiaryData } from "../components/DiaryCard.vue";
 import { useUserStore } from "../stores/userStore";
 import axios from "axios";
@@ -28,6 +44,14 @@ import { ElMessage } from "element-plus";
 
 const userStore = useUserStore();
 const route = useRoute();
+
+// 发布日志对话框控制
+const publishDialogVisible = ref(false);
+
+// 显示发布日志对话框
+const showPublishDialog = () => {
+  publishDialogVisible.value = true;
+};
 
 // 日志列表数据
 const diaryList = ref<DiaryData[]>([]);
@@ -170,7 +194,7 @@ const handleSelectDiary = (item: DiaryData) => {
 
 // 处理点赞状态更新
 const handleLikeStatusUpdate = (id: number, isLike: number) => {
-  const item = diaryList.value.find(d => d.id === id);
+  const item = diaryList.value.find((d) => d.id === id);
   if (item) {
     item.isLike = isLike;
     item.likeCount += isLike === 1 ? 1 : -1;
@@ -204,6 +228,51 @@ const updateYear = async (year: number) => {
   background: #ffffff;
   border-radius: 12px;
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+}
+
+.header-content {
+  flex: 1;
+}
+
+.header-content > h1 {
+  margin: 0;
+  font-size: 22px;
+  color: #0f766e;
+}
+
+.header-content > .subtitle {
+  margin: 6px 0 0 0;
+  font-size: 13px;
+  color: #6b7280;
+}
+
+.publish-btn {
+  font-weight: 600;
+  background: linear-gradient(135deg, #00b09b 0%, #009688 100%) !important;
+  color: #ffffff !important;
+  border: none !important;
+  border-radius: 10px !important;
+  box-shadow: 0 4px 12px rgba(0, 150, 136, 0.25) !important;
+  transition: all 0.3s ease !important;
+  flex: 0 0 auto;
+  padding: 8px 20px !important;
+  height: auto !important;
+  line-height: 1.5 !important;
+}
+
+.publish-btn:hover {
+  background: linear-gradient(135deg, #00a495 0%, #008c7e 100%) !important;
+  transform: translateY(-1px) !important;
+  box-shadow: 0 6px 16px rgba(0, 150, 136, 0.35) !important;
+}
+
+.publish-btn:active {
+  transform: translateY(0) !important;
+  box-shadow: 0 2px 8px rgba(0, 150, 136, 0.2) !important;
 }
 
 .square-header h1 {
