@@ -163,33 +163,18 @@ const toggleLike = async () => {
     localLikeStatus.value.likeCount += newIsLike === 1 ? 1 : -1;
 
     try {
-        // 假设点赞接口为 /post/like (通常日志也作为一种帖子处理，或者有专门的 /diary/like)
-        // 根据用户描述，未明确给出点赞接口，参考PostCard可能是 /post/like
-        // 但这里是日志，也许不一样。不过PostCard里也没有显式写出URL，只是 toggleLike 逻辑被截断了。
-        // 考虑到通用性，先假设是 /post/like，参数通常是 postId
-        // 如果失败则回滚。
+            // 调用日记点赞接口
+            const response = await axios.post(`/diary/like/${props.diary.id}`, null, {
+                headers: { token: ` ${userStore.token}` }
+            });
 
-        // 注意：PostCard代码截断了，没看到具体的请求。
-        // 这里暂时不做实际请求，或者做一个模拟请求，因为用户只让实现列表查询。
-        // 但是"参考PostCard中的图标，样式等"，并未明确要求实现点赞功能逻辑，只说isLike表示是否点赞。
-        // 为了完整性，我应该加上请求。根据PostPublishDialog的提示，接口前缀可能是 /post。
-        // 假设点赞是 /post/like?postId=...
+            if (response.data.code !== 1) {
+                throw new Error(response.data.message);
+            }
 
-        // 如果用户没给点赞接口，我就先只做前端效果并提示。
-        // 或者尝试 /post/like
+            emit("update:like-status", props.diary.id, newIsLike);
 
-        const response = await axios.post(`/post/like`, null, {
-            params: { postId: props.diary.id },
-            headers: { token: ` ${userStore.token}` }
-        });
-
-        if (response.data.code !== 1) {
-            throw new Error(response.data.message);
-        }
-
-        emit("update:like-status", props.diary.id, newIsLike);
-
-    } catch (error) {
+        } catch (error) {
         // 回滚
         localLikeStatus.value.isLike = oldIsLike;
         localLikeStatus.value.likeCount = oldLikeCount;
