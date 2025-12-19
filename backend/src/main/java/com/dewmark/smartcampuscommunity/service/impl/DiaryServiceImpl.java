@@ -7,7 +7,9 @@ import com.dewmark.smartcampuscommunity.mapper.UserDiaryLikeMapper;
 import com.dewmark.smartcampuscommunity.pojo.bo.DiaryQueryBO;
 import org.springframework.transaction.annotation.Transactional;
 import com.dewmark.smartcampuscommunity.pojo.dto.DiaryQueryDTO;
+import com.dewmark.smartcampuscommunity.pojo.dto.DiarySaveDTO;
 import com.dewmark.smartcampuscommunity.pojo.entity.Diary;
+import com.dewmark.smartcampuscommunity.pojo.entity.DiaryImage;
 import com.dewmark.smartcampuscommunity.pojo.entity.UserDiaryLike;
 import com.dewmark.smartcampuscommunity.pojo.entity.Users;
 import com.dewmark.smartcampuscommunity.pojo.vo.DiaryDateVO;
@@ -148,5 +150,42 @@ public class DiaryServiceImpl implements DiaryService {
         userDiaryLikeMapper.updateDiaryLikeCount(diaryId, likeCountChange);
 
         return newStatus;
+    }
+
+    @Override
+    @Transactional
+    public void saveDiary(DiarySaveDTO diarySaveDTO) {
+        Long userId = BaseContext.getCurrentId();
+        LocalDateTime now = LocalDateTime.now();
+
+        // 创建Diary实体
+        Diary diary = new Diary();
+        diary.setTitle(diarySaveDTO.getTitle());
+        diary.setContent(diarySaveDTO.getContent());
+        diary.setIsPublic(diarySaveDTO.getIsPublic());
+        diary.setStatus(diarySaveDTO.getStatus());
+        diary.setUserId(userId);
+        diary.setViewCount(0);
+        diary.setLikeCount(0);
+        diary.setIsDeleted(false);
+        diary.setCreatedAt(now);
+        diary.setUpdatedAt(now);
+
+        // 保存日志基本信息
+        diaryMapper.insert(diary);
+
+        // 保存日志图片
+        List<String> images = diarySaveDTO.getImages();
+        if (images != null && !images.isEmpty()) {
+            List<DiaryImage> diaryImages = new ArrayList<>();
+            for (String imagePath : images) {
+                DiaryImage diaryImage = new DiaryImage();
+                diaryImage.setDiaryId(diary.getId());
+                diaryImage.setImagePath(imagePath);
+                diaryImage.setCreatedAt(new java.sql.Timestamp(System.currentTimeMillis()));
+                diaryImages.add(diaryImage);
+            }
+            diaryImageMapper.saveBatch(diaryImages);
+        }
     }
 }
