@@ -144,10 +144,18 @@
                 class="comment-action"
                 @click.stop="toggleCommentLike(comment)"
               >
-                <el-icon class="comment-action-icon"><Star /></el-icon>
-                <span class="comment-action-text">{{
-                  comment.likeCount || 0
-                }}</span>
+                <el-icon
+                  class="comment-action-icon"
+                  :class="{ liked: comment.isLiked }"
+                >
+                  <Star />
+                </el-icon>
+                <span
+                  class="comment-action-text"
+                  :class="{ 'liked-text': comment.isLiked }"
+                >
+                  {{ comment.likeCount || 0 }}
+                </span>
               </div>
               <div class="comment-action" @click.stop="startReply(comment)">
                 <span class="comment-action-text">回复</span>
@@ -440,7 +448,7 @@ const loadComments = async () => {
             content: item.content,
             createTime: item.createAt, // 使用createAt字段而不是createTime
             likeCount: item.likeCount || 0,
-            isLiked: item.isLiked || false,
+            isLiked: item.isLike === 1,
             isAnonymous: isAnonymous, // 将数字转换为布尔值
             // 添加回复相关字段
             replyToUserId: item.replyUserId, // 回复的用户ID
@@ -600,12 +608,44 @@ const submitAnonymousComment = async () => {
 };
 
 // 切换评论点赞状态
-const toggleCommentLike = (comment: CommentData) => {
-  comment.isLiked = !comment.isLiked;
-  comment.likeCount = (comment.likeCount || 0) + (comment.isLiked ? 1 : -1);
+const toggleCommentLike = async (comment: CommentData) => {
+  if (!userStore.isLoggedIn) {
+    ElMessage.warning("请先登录后再点赞");
+    return;
+  }
 
-  // 这里应该是调用点赞API的逻辑
-  console.log(`评论${comment.isLiked ? "点赞" : "取消点赞"}:`, comment.id);
+  const oldIsLiked = comment.isLiked;
+  const oldLikeCount = comment.likeCount;
+  const newIsLiked = !oldIsLiked;
+
+  try {
+    // 乐观更新UI
+    comment.isLiked = newIsLiked;
+    comment.likeCount = (comment.likeCount || 0) + (newIsLiked ? 1 : -1);
+
+    const response = await axios.put(
+      `/comment/like/${comment.id}`,
+      {},
+      {
+        headers: {
+          token: ` ${userStore.token}`,
+        },
+      }
+    );
+
+    if (response.data.code !== 1) {
+      // 回滚本地状态
+      comment.isLiked = oldIsLiked;
+      comment.likeCount = oldLikeCount;
+      ElMessage.error(response.data.message || "操作失败，请重试");
+    }
+  } catch (err) {
+    console.error("评论点赞操作失败:", err);
+    // 回滚本地状态
+    comment.isLiked = oldIsLiked;
+    comment.likeCount = oldLikeCount;
+    ElMessage.error((err as any).message || "网络错误，请稍后重试");
+  }
 };
 
 // 开始回复
@@ -774,6 +814,15 @@ const handleCardClick = () => {
   transition: all 0.3s ease;
   cursor: pointer;
   user-select: none;
+}
+
+/* 评论点赞状态样式 */
+.comment-action .comment-action-icon.liked {
+  color: #ff4d4f !important;
+}
+
+.comment-action .comment-action-text.liked-text {
+  color: #ff4d4f !important;
 }
 
 .post-card:active {

@@ -10,7 +10,7 @@ export interface UserInfo {
 
 export const useUserStore = defineStore('user', () => {
   const user = ref<UserInfo>({ id: null, userName: '',avatar:'', token: '' })
-  const token = ref<string>('')
+  const token = computed(() => user.value.token || '')
   const roles = ref<string[]>([])
   const permissions = ref<string[]>([])
   const loggedIn = ref(false)
@@ -20,7 +20,7 @@ export const useUserStore = defineStore('user', () => {
   // 用于触发页面刷新的状态标志
   const refreshFlag = ref(0)
 
-  const isLoggedIn = computed(() => loggedIn.value)
+  const isLoggedIn = computed(() => loggedIn.value || !!user.value.id)
   const displayName = computed(() => user.value.userName || '')
 
   function loginSuccess(payload: { id: number; userName: string; token?: string; remember?: boolean; avatar?: string | null }) {
@@ -50,14 +50,13 @@ export const useUserStore = defineStore('user', () => {
     }
     
     user.value = { 
-      id: payload.id, 
-      userName: payload.userName, 
-      token: payload.token || '', 
-      avatar: avatarUrl 
-    }
-    loggedIn.value = true
-    if (payload.token) token.value = payload.token
-    rememberedUser.value = payload.remember ? { username: payload.userName, id: payload.id } : null
+    id: payload.id, 
+    userName: payload.userName, 
+    token: payload.token || '', 
+    avatar: avatarUrl 
+  }
+  loggedIn.value = true
+  rememberedUser.value = payload.remember ? { username: payload.userName, id: payload.id } : null
     
     // 登录成功后触发页面刷新
     triggerRefresh()

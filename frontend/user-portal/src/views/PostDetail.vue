@@ -179,10 +179,18 @@
                     class="comment-action"
                     @click.stop="toggleCommentLike(comment)"
                   >
-                    <el-icon class="comment-action-icon"><Star /></el-icon>
-                    <span class="comment-action-text">{{
-                      comment.likeCount || 0
-                    }}</span>
+                    <el-icon
+                      class="comment-action-icon"
+                      :class="{ liked: comment.isLiked }"
+                    >
+                      <Star />
+                    </el-icon>
+                    <span
+                      class="comment-action-text"
+                      :class="{ 'liked-text': comment.isLiked }"
+                    >
+                      {{ comment.likeCount || 0 }}
+                    </span>
                   </div>
                   <div class="comment-action" @click.stop="startReply(comment)">
                     <span class="comment-action-text">回复</span>
@@ -519,7 +527,7 @@ const loadComments = async () => {
             content: item.content,
             createTime: item.createAt,
             likeCount: item.likeCount || 0,
-            isLiked: item.isLiked || false,
+            isLiked: item.isLike === 1,
             isAnonymous: isAnonymous,
             replyToUserId: item.replyUserId,
             replyToUserName: item.replyUserName,
@@ -555,7 +563,7 @@ const loadComments = async () => {
         content: "我也有同感，期待更多精彩内容！",
         createTime: new Date(Date.now() - 7200000),
         likeCount: 2,
-        isLiked: false,
+        isLiked: true,
       },
     ];
   }
@@ -643,9 +651,44 @@ const submitAnonymousComment = async () => {
 };
 
 // 切换评论点赞状态
-const toggleCommentLike = (comment: any) => {
-  comment.isLiked = !comment.isLiked;
-  comment.likeCount = (comment.likeCount || 0) + (comment.isLiked ? 1 : -1);
+const toggleCommentLike = async (comment: any) => {
+  if (!userStore.isLoggedIn) {
+    ElMessage.warning("请先登录后再点赞");
+    return;
+  }
+
+  const oldIsLiked = comment.isLiked;
+  const oldLikeCount = comment.likeCount;
+  const newIsLiked = !oldIsLiked;
+
+  try {
+    // 乐观更新UI
+    comment.isLiked = newIsLiked;
+    comment.likeCount = (comment.likeCount || 0) + (newIsLiked ? 1 : -1);
+
+    const response = await axios.put(
+      `/comment/like/${comment.id}`,
+      {},
+      {
+        headers: {
+          token: ` ${userStore.token}`,
+        },
+      }
+    );
+
+    if (response.data.code !== 1) {
+      // 回滚本地状态
+      comment.isLiked = oldIsLiked;
+      comment.likeCount = oldLikeCount;
+      ElMessage.error(response.data.message || "操作失败，请重试");
+    }
+  } catch (err) {
+    console.error("评论点赞操作失败:", err);
+    // 回滚本地状态
+    comment.isLiked = oldIsLiked;
+    comment.likeCount = oldLikeCount;
+    ElMessage.error((err as any).message || "网络错误，请稍后重试");
+  }
 };
 
 // 开始回复
@@ -1102,6 +1145,15 @@ onMounted(() => {
 
 .comment-action-text {
   font-size: 14px;
+}
+
+/* 评论点赞状态样式 */
+.comment-action .comment-action-icon.liked {
+  color: #ff4d4f !important;
+}
+
+.comment-action .comment-action-text.liked-text {
+  color: #ff4d4f !important;
 }
 
 /* 回复输入框样式 */
