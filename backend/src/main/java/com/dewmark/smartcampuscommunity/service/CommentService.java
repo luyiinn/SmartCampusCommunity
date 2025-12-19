@@ -10,4 +10,6 @@ public interface CommentService {
     void add(CommentDTO commentDTO);
 
     List<CommentVO> list(Long postId);
+
+    void setLike(Long commentId);
 }

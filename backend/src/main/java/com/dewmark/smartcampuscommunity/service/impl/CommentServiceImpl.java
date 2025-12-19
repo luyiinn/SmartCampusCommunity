@@ -3,9 +3,11 @@ package com.dewmark.smartcampuscommunity.service.impl;
 import com.dewmark.smartcampuscommunity.context.BaseContext;
 import com.dewmark.smartcampuscommunity.mapper.CommentMapper;
 import com.dewmark.smartcampuscommunity.mapper.PostMapper;
+import com.dewmark.smartcampuscommunity.mapper.UserCommentLikeMapper;
 import com.dewmark.smartcampuscommunity.mapper.UsersMapper;
 import com.dewmark.smartcampuscommunity.pojo.dto.CommentDTO;
 import com.dewmark.smartcampuscommunity.pojo.entity.Comment;
+import com.dewmark.smartcampuscommunity.pojo.entity.UserCommentLike;
 import com.dewmark.smartcampuscommunity.pojo.entity.Users;
 import com.dewmark.smartcampuscommunity.pojo.vo.CommentVO;
 import com.dewmark.smartcampuscommunity.service.CommentService;
@@ -13,6 +15,7 @@ import com.dewmark.smartcampuscommunity.service.PostService;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -29,18 +32,23 @@ public class CommentServiceImpl implements CommentService {
     private final CommentMapper commentMapper;
     private final UsersMapper usersMapper;
     private final PostService postService;
+    private final UserCommentLikeMapper userCommentLikeMapper;
+
     @Autowired
     public CommentServiceImpl(
             CommentMapper commentMapper,
             UsersMapper usersMapper,
-            PostService postService) {
+            PostService postService,
+            UserCommentLikeMapper userCommentLikeMapper) {
         this.commentMapper = commentMapper;
         this.usersMapper = usersMapper;
         this.postService = postService;
+        this.userCommentLikeMapper = userCommentLikeMapper;
     }
 
     /**
      * 新增评论
+     * 
      * @param commentDTO
      * @return void
      * @author dewMark
@@ -65,6 +73,7 @@ public class CommentServiceImpl implements CommentService {
 
     /**
      * 根据帖子id展示评论列表
+     * 
      * @param postId
      * @return com.dewmark.smartcampuscommunity.pojo.vo.CommentListVo
      * @author dewMark
@@ -72,16 +81,15 @@ public class CommentServiceImpl implements CommentService {
      **/
     @Override
     public List<CommentVO> list(Long postId) {
-         List<Comment> comments = commentMapper.list(postId);
-         List<CommentVO> commentVOList = new ArrayList<>();
+        List<Comment> comments = commentMapper.list(postId);
+        List<CommentVO> commentVOList = new ArrayList<>();
 
-         // 为CommentVO补充用户名，用户头像
-         comments.forEach(comment -> {
+        // 为CommentVO补充用户名，用户头像
+        comments.forEach(comment -> {
             Users users = usersMapper.selectById(comment.getUserId());
-             Long replyUserId = comment.getReplyUserId();
+            Long replyUserId = comment.getReplyUserId();
 
-             CommentVO commentVO
-                    = new CommentVO()
+            CommentVO commentVO = new CommentVO()
                     .builder()
                     .avatar(users.getAvatar())
                     .userName(users.getUsername())
@@ -93,9 +101,78 @@ public class CommentServiceImpl implements CommentService {
                 commentVO.setReplyUserName(replyUsername);
             }
 
+            // 设置点赞状态
+            Integer isLike = 0;
+            List<UserCommentLike> exist = userCommentLikeMapper.isExist(BaseContext.getCurrentId(), comment.getId());
+            if (exist != null && !exist.isEmpty()) {
+                if (exist.get(0).getLikeStatus() == 1) {
+                    isLike = 1;
+                }
+            }
+            commentVO.setIsLike(isLike);
+
             commentVOList.add(commentVO);
         });
 
         return commentVOList;
+    }
+
+    /**
+     * 评论点赞OR取消点赞
+     * 
+     * @param commentId
+     * @return void
+     * @author dewMark
+     * @create 19/12/2025
+     **/
+    @Override
+    @Transactional
+    public void setLike(Long commentId) {
+        Long userId = BaseContext.getCurrentId();
+        Comment comment = commentMapper.selectById(commentId);
+
+        // 查询用户的点赞记录
+        List<UserCommentLike> userCommentLikes = userCommentLikeMapper.isExist(userId, commentId);
+
+        // 判断是否存在记录
+        boolean isExist = userCommentLikes != null && !userCommentLikes.isEmpty();
+
+        if (isExist) {
+            // 存在记录，获取最新记录的状态
+            UserCommentLike latestRecord = userCommentLikes.get(0);
+            Integer currentStatus = latestRecord.getLikeStatus();
+
+            if (currentStatus == 1) {
+                // 当前是点赞状态，执行取消点赞
+                UserCommentLike updateEntity = UserCommentLike.builder()
+                        .id(latestRecord.getId())
+                        .likeStatus(0)
+                        .build();
+                userCommentLikeMapper.updateById(updateEntity);
+
+                // 评论点赞数-1
+                commentMapper.updateLikeCount(commentId, -1);
+
+            } else {
+                // 当前是取消点赞状态，执行重新点赞
+                UserCommentLike updateEntity = UserCommentLike.builder()
+                        .id(latestRecord.getId())
+                        .likeStatus(1)
+                        .build();
+                userCommentLikeMapper.updateById(updateEntity);
+                // 评论点赞数+1
+                commentMapper.updateLikeCount(commentId, 1);
+            }
+        } else {
+            // 不存在记录，创建新的点赞记录
+            UserCommentLike newEntity = UserCommentLike.builder()
+                    .commentId(commentId)
+                    .userId(userId)
+                    .likeStatus(1)
+                    .build();
+            userCommentLikeMapper.insert(newEntity);
+            // 评论点赞数+1
+            commentMapper.updateLikeCount(commentId, 1);
+        }
     }
 }

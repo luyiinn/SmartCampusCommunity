@@ -52,6 +52,7 @@ public class CommentVO {
     /** 评论点赞数，默认为0 */
     private Integer likeCount;
 
-
+    /** 是否已点赞：0-未点赞，1-已点赞 */
+    private Integer isLike;
 
 }
