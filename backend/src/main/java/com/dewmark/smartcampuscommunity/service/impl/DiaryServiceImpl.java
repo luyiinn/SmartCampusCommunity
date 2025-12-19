@@ -3,8 +3,9 @@ package com.dewmark.smartcampuscommunity.service.impl;
 import com.dewmark.smartcampuscommunity.context.BaseContext;
 import com.dewmark.smartcampuscommunity.mapper.DiaryImageMapper;
 import com.dewmark.smartcampuscommunity.mapper.DiaryMapper;
-import com.dewmark.smartcampuscommunity.mapper.UserDiarytLikeMapper;
+import com.dewmark.smartcampuscommunity.mapper.UserDiaryLikeMapper;
 import com.dewmark.smartcampuscommunity.pojo.bo.DiaryQueryBO;
+import org.springframework.transaction.annotation.Transactional;
 import com.dewmark.smartcampuscommunity.pojo.dto.DiaryQueryDTO;
 import com.dewmark.smartcampuscommunity.pojo.entity.Diary;
 import com.dewmark.smartcampuscommunity.pojo.entity.UserDiaryLike;
@@ -34,17 +35,19 @@ public class DiaryServiceImpl implements DiaryService {
 
     private final DiaryMapper diaryMapper;
     private final DiaryImageMapper diaryImageMapper;
-    private final UserDiarytLikeMapper userDiarytLikeMapper;
+    private final UserDiaryLikeMapper userDiaryLikeMapper;
+
     public DiaryServiceImpl(DiaryMapper diaryMapper,
-                            DiaryImageMapper diaryImageMapper,
-                            UserDiarytLikeMapper userDiarytLikeMapper) {
+            DiaryImageMapper diaryImageMapper,
+            UserDiaryLikeMapper userDiaryLikeMapper) {
         this.diaryMapper = diaryMapper;
         this.diaryImageMapper = diaryImageMapper;
-        this.userDiarytLikeMapper = userDiarytLikeMapper;
+        this.userDiaryLikeMapper = userDiaryLikeMapper;
     }
 
     /**
      * 根据年份获取该用户日志记录情况
+     * 
      * @param year
      * @return com.dewmark.smartcampuscommunity.pojo.vo.DiaryDateVO
      * @author dewMark
@@ -54,7 +57,7 @@ public class DiaryServiceImpl implements DiaryService {
     public DiaryDateVO getDate(Integer year) {
         DiaryDateVO vo = new DiaryDateVO();
         Long userId = BaseContext.getCurrentId();
-        List<LocalDateTime> dates = diaryMapper.getDates(userId,year);
+        List<LocalDateTime> dates = diaryMapper.getDates(userId, year);
         // 格式化为 yyyy-MM-dd 字符串
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
         List<String> formattedDates = dates.stream()
@@ -69,6 +72,7 @@ public class DiaryServiceImpl implements DiaryService {
 
     /**
      * 日志分页查询
+     * 
      * @param diaryQueryDTO
      * @return com.dewmark.smartcampuscommunity.pojo.vo.PageVO<com.dewmark.smartcampuscommunity.pojo.vo.DiaryListVO>
      * @author dewMark
@@ -81,8 +85,7 @@ public class DiaryServiceImpl implements DiaryService {
         // 起始索引计算
         Integer offset = (diaryQueryDTO.getPage() - 1) * diaryQueryDTO.getSize();
         // 构建
-        DiaryQueryBO diaryQueryBO
-                = new DiaryQueryBO()
+        DiaryQueryBO diaryQueryBO = new DiaryQueryBO()
                 .builder()
                 .offset(offset)
                 .keyword(diaryQueryDTO.getKeyword())
@@ -109,10 +112,10 @@ public class DiaryServiceImpl implements DiaryService {
             diaryListVO.setImages(diaryImageMapper.getImagesByDiaryId(diary.getId()));
             // 判断用户是否点赞
             // 查询是否存在点赞记录
-            List<UserDiaryLike> userDiaryLikes = userDiarytLikeMapper.isExist(currentId,diary.getId());
+            List<UserDiaryLike> userDiaryLikes = userDiaryLikeMapper.isExist(currentId, diary.getId());
             if (userDiaryLikes != null && !userDiaryLikes.isEmpty()) { // 存在记录，存储其状态
                 diaryListVO.setIsLike(userDiaryLikes.get(0).getLikeStatus());
-            }else { // 不存在记录是为未点赞
+            } else { // 不存在记录是为未点赞
                 diaryListVO.setIsLike((byte) 0);
             }
             // 存入构建好的diaryListVOS
@@ -124,5 +127,26 @@ public class DiaryServiceImpl implements DiaryService {
         pageVO.setList(diaryListVOS);
 
         return pageVO;
+    }
+
+    @Override
+    @Transactional
+    public Byte toggleDiaryLikeStatus(Long diaryId) {
+        Long userId = BaseContext.getCurrentId();
+
+        // 查询当前点赞状态
+        List<UserDiaryLike> existingLikes = userDiaryLikeMapper.isExist(userId, diaryId);
+        Byte currentStatus = existingLikes != null && !existingLikes.isEmpty() ? existingLikes.get(0).getLikeStatus()
+                : 0;
+
+        // 计算新的点赞状态和点赞数变化
+        Byte newStatus = currentStatus == 1 ? (byte) 0 : 1;
+        Integer likeCountChange = newStatus == 1 ? 1 : -1;
+
+        // 更新点赞状态和日记点赞数
+        userDiaryLikeMapper.saveOrUpdateLikeStatus(userId, diaryId, newStatus);
+        userDiaryLikeMapper.updateDiaryLikeCount(diaryId, likeCountChange);
+
+        return newStatus;
     }
 }

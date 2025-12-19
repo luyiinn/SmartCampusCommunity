@@ -70,5 +70,24 @@ public class DiaryController {
 
         return Result.success(list);
     }
+    
+    /**
+     * 切换日志点赞状态
+     * @param diaryId 日志ID
+     * @return com.dewmark.smartcampuscommunity.result.Result<java.lang.Byte>
+     * @author dewMark
+     * @create 19/12/2025
+     **/
+    @PostMapping("/like/{diaryId}")
+    public Result<Byte> toggleDiaryLike(@PathVariable Long diaryId){
+        log.info("切换日志点赞状态，日志ID：{}", diaryId);
+        
+        if (diaryId == null){
+            throw new DataNotIlegalException(MessageConstant.DATA_UNILEGAL);
+        }
+        
+        Byte newStatus = diaryService.toggleDiaryLikeStatus(diaryId);
+        return Result.success(newStatus);
+    }
 
 }

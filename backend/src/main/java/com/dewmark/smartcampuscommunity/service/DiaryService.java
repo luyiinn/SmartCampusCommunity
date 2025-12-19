@@ -9,4 +9,6 @@ public interface DiaryService {
     DiaryDateVO getDate(Integer year);
 
     PageVO<DiaryListVO> getListByUser(DiaryQueryDTO diaryQueryDTO);
+    
+    Byte toggleDiaryLikeStatus(Long diaryId);
 }
