@@ -1,33 +1,204 @@
-HELP.md
+# ==================== 后端 (Java/Spring Boot) ====================
+# Maven
 target/
+pom.xml.tag
+pom.xml.releaseBackup
+pom.xml.versionsBackup
+pom.xml.next
+release.properties
+dependency-reduced-pom.xml
+buildNumber.properties
+.mvn/target/
 .mvn/wrapper/maven-wrapper.jar
-!**/src/main/**/target/
-!**/src/test/**/target/
 
-### STS ###
-.apt_generated
-.classpath
-.factorypath
-.project
-.settings
-.springBeans
-.sts4-cache
+# Gradle (如果有)
+.gradle/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/build/
 
-### IntelliJ IDEA ###
-.idea
+# IDEA
+.idea/
 *.iws
 *.iml
 *.ipr
+out/
 
-### NetBeans ###
+# Eclipse
+.settings/
+bin/
+tmp/
+*.tmp
+*.bak
+*.swp
+*~.nib
+local.properties
+.loadpath
+.recommenders
+
+# NetBeans
 /nbproject/private/
 /nbbuild/
 /dist/
 /nbdist/
 /.nb-gradle/
-build/
-!**/src/main/**/build/
-!**/src/test/**/build/
 
-### VS Code ###
+# VS Code
 .vscode/
+
+# ==================== 前端 (Node.js) ====================
+# Dependencies
+frontend/*/node_modules/
+node_modules/
+/.pnpm-store/
+
+# Build outputs
+frontend/*/dist/
+frontend/*/build/
+frontend/*/.next/
+frontend/*/out/
+frontend/*/.nuxt/
+frontend/*/.output/
+frontend/*/.svelte-kit/
+frontend/*/.astro/
+
+# Cache
+frontend/*/.npm
+frontend/*/.eslintcache
+frontend/*/.cache/
+frontend/*/.parcel-cache/
+frontend/*/.vite/
+frontend/*/.yarn/cache
+
+# Logs
+frontend/*/npm-debug.log*
+frontend/*/yarn-debug.log*
+frontend/*/yarn-error.log*
+frontend/*/pnpm-debug.log*
+frontend/*/lerna-debug.log*
+
+# Runtime data
+frontend/*/pids
+frontend/*/*.pid
+frontend/*/*.seed
+frontend/*/*.pid.lock
+
+# Coverage directory used by tools like istanbul
+frontend/*/coverage/
+frontend/*/*.lcov
+
+# ==================== 环境配置文件 ====================
+# Local environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+.env*.local
+
+# Sensitive credentials
+*.key
+*.pem
+*.crt
+application*.properties
+application*.yml
+application*.yaml
+
+# ==================== 操作系统文件 ====================
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+Thumbs.db
+Thumbs.db:encryptable
+ehthumbs.db
+ehthumbs_vista.db
+*.stackdump
+[Dd]esktop.ini
+$RECYCLE.BIN/
+*.cab
+*.msi
+*.msix
+*.msm
+*.msp
+*.lnk
+
+# Linux
+*~
+.fuse_hidden*
+.directory
+.Trash-*
+.nfs*
+
+# ==================== 日志文件 ====================
+*.log
+logs/
+*.pid
+*.pid.lock
+
+# ==================== 数据库/本地存储 ====================
+# *.db
+*.db-journal
+*.sqlite
+*.sqlite3
+*.h2.db
+
+# ==================== 包管理器特定 ====================
+# Yarn 2+
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+.pnp.*
+
+# pnpm
+pnpm-lock.yaml
+
+# ==================== 其他 ====================
+# System files
+*.swp
+*.swo
+*~
+
+# Temporary files
+tmp/
+temp/
+
+# Profiling
+*.cpuprofile
+*.heapsnapshot
+
+# Visual Studio
+*.user
+*.userosscache
+*.sln.docstates
+*.suo
+*.tt
+*.tts
+*.userprefs
+
+# 注意：确保不忽略必要的源码目录
+!**/src/main/**
+!**/src/test/**
+
+# ==================== 项目特定 ====================
+# 你的项目可能有特殊的目录需要忽略
+# uploads/
+# data/
+# backups/
