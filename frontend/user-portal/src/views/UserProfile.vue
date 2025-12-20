@@ -609,56 +609,44 @@ const fetchMoreLikedPosts = async () => {
 };
 
 // 处理点赞状态更新
-const handleLikeStatusUpdate = async (id: number, isLike: number) => {
-  // 先更新本地状态，提供即时反馈
+const handleLikeStatusUpdate = (id: number, isLike: number) => {
+  // 更新用户帖子列表中的点赞状态
   const postIndex = userPosts.value.findIndex((post) => post.id === id);
   if (postIndex !== -1) {
     const post = userPosts.value[postIndex];
     if (post) {
-      const oldLikeStatus = post.isLike;
-      const oldLikeCount = post.likeCount;
+      const oldLikeStatus = post.isLike || 0;
 
-      // 立即更新UI
+      // 更新点赞状态
       post.isLike = isLike;
-      post.likeCount = (post.likeCount || 0) + (isLike === 1 ? 1 : -1);
-      userPosts.value = [...userPosts.value];
 
-      try {
-        // 调用点赞API - 使用PUT请求和正确的URL格式
-        const response = await axios.put(
-          `/post/like/${id}`,
-          {},
-          {
-            headers: {
-              token: ` ${userStore.token}`,
-            },
-            timeout: 5000,
-          }
-        );
-
-        // 验证响应
-        if (!response || !response.data || response.data.code !== 1) {
-          // 恢复原状态
-          if (post) {
-            post.isLike = oldLikeStatus;
-            post.likeCount = oldLikeCount;
-            userPosts.value = [...userPosts.value];
-          }
-
-          const errorMsg = response?.data?.msg || "点赞操作失败，请稍后重试";
-          ElMessage.error(errorMsg);
-        }
-      } catch (error) {
-        // 恢复原状态
-        if (post) {
-          post.isLike = oldLikeStatus;
-          post.likeCount = oldLikeCount;
-          userPosts.value = [...userPosts.value];
-        }
-
-        console.error("点赞操作失败:", error);
-        ElMessage.error("网络异常，点赞操作失败");
+      // 根据点赞状态变化更新点赞数
+      if (isLike === 1 && oldLikeStatus === 0) {
+        post.likeCount = (post.likeCount || 0) + 1;
+      } else if (isLike === 0 && oldLikeStatus === 1) {
+        post.likeCount = (post.likeCount || 0) - 1;
       }
+      userPosts.value = [...userPosts.value];
+    }
+  }
+
+  // 更新已点赞帖子列表中的点赞状态
+  const likedPostIndex = likedPosts.value.findIndex((post) => post.id === id);
+  if (likedPostIndex !== -1) {
+    const post = likedPosts.value[likedPostIndex];
+    if (post) {
+      const oldLikeStatus = post.isLike || 0;
+
+      // 更新点赞状态
+      post.isLike = isLike;
+
+      // 根据点赞状态变化更新点赞数
+      if (isLike === 1 && oldLikeStatus === 0) {
+        post.likeCount = (post.likeCount || 0) + 1;
+      } else if (isLike === 0 && oldLikeStatus === 1) {
+        post.likeCount = (post.likeCount || 0) - 1;
+      }
+      likedPosts.value = [...likedPosts.value];
     }
   }
 };
