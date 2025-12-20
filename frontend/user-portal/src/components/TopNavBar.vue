@@ -201,6 +201,9 @@ const handleCommand = (command: string) => {
     router.push("/square");
     // 刷新页面以确保状态完全重置
     window.location.reload();
+  } else if (command === "profile") {
+    // 跳转到个人主页
+    router.push("/profile");
   } else {
     // 处理其他命令逻辑
     console.log(`执行命令: ${command}`);

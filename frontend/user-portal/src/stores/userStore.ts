@@ -64,7 +64,6 @@ export const useUserStore = defineStore('user', () => {
 
   function logout() {
     user.value = { id: null, userName: '', token: '' ,avatar:'',}
-    token.value = ''
     loggedIn.value = false
     permissions.value = []
     roles.value = []
@@ -82,7 +81,7 @@ export const useUserStore = defineStore('user', () => {
 
   function setPermissions(perms: string[]) { permissions.value = perms }
   function setRoles(rs: string[]) { roles.value = rs }
-  function setToken(t: string) { token.value = t }
+  function setToken(t: string) { user.value.token = t }
   function requireLogin(redirectTo?: string) {
     authModalVisible.value = true
     if (redirectTo) pendingRoute.value = redirectTo

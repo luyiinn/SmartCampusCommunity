@@ -77,10 +77,20 @@
         @update:like-status="handleLikeStatusUpdate"
       />
 
-      <!-- 收藏列表 - 占位 -->
-      <div v-else-if="activeNav === 1" class="content-placeholder">
-        <el-empty description="收藏功能即将上线" />
-      </div>
+      <!-- 收藏列表 -->
+      <PostList
+        v-else-if="activeNav === 1"
+        :title="'我的收藏'"
+        :items="likedPosts"
+        :loading="likedPostsLoading"
+        :auto-fetch="true"
+        :has-more="likedPostsHasMore"
+        :loading-more="likedPostsLoadingMore"
+        @fetch="fetchLikedPosts"
+        @fetch-more="fetchMoreLikedPosts"
+        @select="handleSelectPost"
+        @update:like-status="handleLikeStatusUpdate"
+      />
 
       <!-- 关于页面 - 占位 -->
       <div v-else-if="activeNav === 2" class="content-placeholder">
@@ -113,6 +123,14 @@ const loadingMore = ref(false);
 const hasMore = ref(true);
 const currentPage = ref(1);
 const totalPosts = ref(0);
+
+// 收藏列表数据状态
+const likedPosts = ref<PostItem[]>([]);
+const likedPostsLoading = ref(false);
+const likedPostsLoadingMore = ref(false);
+const likedPostsHasMore = ref(true);
+const likedPostsCurrentPage = ref(1);
+const likedPostsTotal = ref(0);
 
 // 定义API响应数据结构
 interface PostApiResponse {
@@ -366,6 +384,227 @@ const fetchMorePosts = async () => {
     }
   } finally {
     loadingMore.value = false;
+  }
+};
+
+// 获取用户已点赞帖子列表
+const fetchLikedPosts = async () => {
+  if (!userStore.isLoggedIn) {
+    return;
+  }
+
+  likedPostsLoading.value = true;
+  likedPostsCurrentPage.value = 1;
+
+  try {
+    // 构建请求参数
+    const params = {
+      page: likedPostsCurrentPage.value,
+      size: 10,
+    };
+
+    // 向 /post/liked-list API 发送请求并添加认证 token
+    const response = await axios.get<PostApiResponse>("/post/liked-list", {
+      params,
+      headers: {
+        token: ` ${userStore.token}`,
+      },
+      timeout: 10000,
+    });
+
+    // 验证响应格式
+    if (!response || !response.data) {
+      throw new Error("无效的响应数据");
+    }
+
+    // 检查响应码
+    if (response.data.code === 1) {
+      // 验证数据结构
+      if (!response.data.data || !Array.isArray(response.data.data.list)) {
+        throw new Error("API返回的数据格式不正确");
+      }
+
+      // 更新总数据量
+      likedPostsTotal.value = response.data.data.total || 0;
+
+      // 转换新获取的帖子数据
+      const newPosts = response.data.data.list
+        .filter((item) => item && typeof item === "object") // 过滤掉无效项
+        .map((item) => ({
+          id: item.id,
+          title: item.title || "无标题",
+          content: item.contentSummary || "",
+          date: item.createdAt || new Date().toISOString(),
+          userId: item.userId || 0,
+          userName: item.userName || "未知用户",
+          avatar: item.avatar || null,
+          isAnonymous: item.isAnonymous || 0,
+          viewCount: item.viewCount || 0,
+          likeCount: item.likeCount || 0,
+          commentCount: item.commentCount || 0,
+          tags: item.tags || [],
+          isLike: item.isLike || 0,
+          images: item.images || [], // 传递图片数组给PostList组件
+        }));
+
+      likedPosts.value = newPosts;
+      likedPostsHasMore.value = likedPosts.value.length < likedPostsTotal.value;
+
+      // 如果是首次加载且帖子列表为空，显示提示信息
+      if (likedPosts.value.length === 0) {
+        ElMessage.info("您还没有点赞过帖子");
+      }
+    } else {
+      // 处理业务错误
+      const errorMessage = response.data.msg || "获取点赞帖子失败，请稍后重试";
+      ElMessage.error(errorMessage);
+      console.error("API业务错误:", errorMessage);
+      likedPosts.value = [];
+    }
+  } catch (error) {
+    // 处理网络错误、超时等
+    console.error("获取点赞帖子列表失败:", error);
+
+    if (axios.isAxiosError(error)) {
+      if (error.code === "ECONNABORTED") {
+        ElMessage.error("请求超时，请检查网络连接");
+      } else if (error.response) {
+        // 服务器返回错误状态码
+        const status = error.response.status;
+        if (status === 401) {
+          ElMessage.error("登录已过期，请重新登录");
+          userStore.requireLogin();
+        } else if (status === 403) {
+          ElMessage.error("您没有权限查看点赞帖子");
+        } else if (status >= 500) {
+          ElMessage.error("服务器错误，请稍后重试");
+        } else {
+          ElMessage.error(`请求失败: ${error.response.status}`);
+        }
+      } else if (error.request) {
+        // 请求已发送但没有收到响应
+        ElMessage.error("网络连接失败，请检查您的网络");
+      } else {
+        // 请求配置出错
+        ElMessage.error("请求配置错误");
+      }
+    } else {
+      // 其他类型的错误
+      ElMessage.error("获取点赞帖子失败，请稍后重试");
+    }
+
+    likedPosts.value = [];
+  } finally {
+    likedPostsLoading.value = false;
+  }
+};
+
+// 加载更多已点赞帖子
+const fetchMoreLikedPosts = async () => {
+  if (
+    likedPostsLoadingMore.value ||
+    !likedPostsHasMore.value ||
+    !userStore.isLoggedIn
+  )
+    return;
+
+  likedPostsLoadingMore.value = true;
+
+  try {
+    // 增加页码
+    likedPostsCurrentPage.value++;
+
+    // 构建请求参数
+    const params = {
+      page: likedPostsCurrentPage.value,
+      size: 10,
+    };
+
+    // 向 /post/liked-list API 发送请求并添加认证 token
+    const response = await axios.get<PostApiResponse>("/post/liked-list", {
+      params,
+      headers: {
+        token: ` ${userStore.token}`,
+      },
+      timeout: 10000,
+    });
+
+    // 验证响应格式
+    if (!response || !response.data) {
+      throw new Error("无效的响应数据");
+    }
+
+    // 检查响应码
+    if (response.data.code === 1) {
+      // 验证数据结构
+      if (!response.data.data || !Array.isArray(response.data.data.list)) {
+        throw new Error("API返回的数据格式不正确");
+      }
+
+      // 转换新获取的帖子数据
+      const newPosts = response.data.data.list
+        .filter((item) => item && typeof item === "object") // 过滤掉无效项
+        .map((item) => ({
+          id: item.id,
+          title: item.title || "无标题",
+          content: item.contentSummary || "",
+          date: item.createdAt || new Date().toISOString(),
+          userId: item.userId || 0,
+          userName: item.userName || "未知用户",
+          avatar: item.avatar || null,
+          isAnonymous: item.isAnonymous || 0,
+          viewCount: item.viewCount || 0,
+          likeCount: item.likeCount || 0,
+          commentCount: item.commentCount || 0,
+          tags: item.tags || [],
+          isLike: item.isLike || 0,
+          images: item.images || [], // 传递图片数组给PostList组件
+        }));
+
+      // 避免重复数据
+      const existingIds = new Set(likedPosts.value.map((post) => post.id));
+      const uniqueNewPosts = newPosts.filter(
+        (post) => !existingIds.has(post.id)
+      );
+
+      // 追加数据
+      likedPosts.value = [...likedPosts.value, ...uniqueNewPosts];
+      likedPostsHasMore.value =
+        likedPosts.value.length < (response.data.data.total || 0);
+    } else {
+      // 处理业务错误
+      const errorMessage =
+        response.data.msg || "加载更多点赞帖子失败，请稍后重试";
+      ElMessage.error(errorMessage);
+      console.error("API业务错误:", errorMessage);
+    }
+  } catch (error) {
+    // 处理网络错误、超时等
+    console.error("加载更多点赞帖子失败:", error);
+
+    if (axios.isAxiosError(error)) {
+      if (error.code === "ECONNABORTED") {
+        ElMessage.error("请求超时，请检查网络连接");
+      } else if (error.response) {
+        const status = error.response.status;
+        if (status === 401) {
+          ElMessage.error("登录已过期，请重新登录");
+          userStore.requireLogin();
+        } else if (status >= 500) {
+          ElMessage.error("服务器错误，请稍后重试");
+        } else {
+          ElMessage.error(`请求失败: ${error.response.status}`);
+        }
+      } else if (error.request) {
+        ElMessage.error("网络连接失败，请检查您的网络");
+      } else {
+        ElMessage.error("请求配置错误");
+      }
+    } else {
+      ElMessage.error("加载更多点赞帖子失败，请稍后重试");
+    }
+  } finally {
+    likedPostsLoadingMore.value = false;
   }
 };
 
