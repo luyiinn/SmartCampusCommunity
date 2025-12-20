@@ -325,4 +325,52 @@ public class PostServiceImpl implements PostService {
 
         return postDetailVO;
     }
+
+    @Override
+    public PageVO<PostListVO> pageLikedPosts(PostQueryDTO postQueryDTO) {
+        // 构建查询BO
+        PostQueryBO queryBO = PostQueryBO.builder()
+                .keyword(postQueryDTO.getKeyword())
+                .tagId(postQueryDTO.getTagId())
+                .offset((postQueryDTO.getPage() - 1) * postQueryDTO.getSize())
+                .limit(postQueryDTO.getSize())
+                .userId(BaseContext.getCurrentId())
+                .status(postQueryDTO.getStatus())
+                .build();
+
+        // 查询总数量
+        Long total = postMapper.selectLikedPostCount(queryBO);
+
+        // 查询数据列表（SQL中处理内容摘要）
+        List<PostListVO> postListVOS = postMapper.selectLikedPostListWithSummary(queryBO);
+
+        // 为每个帖子查询标签
+        for (PostListVO vo : postListVOS) {
+            vo.setTags(tagMapper.selectTagNamesByPostId(vo.getId()));
+        }
+
+        // 为每个帖子查询用户头像和名称，以及是否已点赞
+        postListVOS.forEach(postListVO -> {
+            Users user = usersService.findByUserId(postListVO.getUserId());
+            postListVO.setUserName(user.getUsername());
+            postListVO.setAvatar(user.getAvatar());
+            Integer isLike = 0;
+            List<UserPostLike> exist = userPostLikeMapper.isExist(BaseContext.getCurrentId(), postListVO.getId());
+            if (exist != null && !exist.isEmpty()) {
+                if (exist.get(0).getLikeStatus() == 1){
+                    isLike = 1;
+                }
+            }
+            postListVO.setIsLike(isLike);
+        });
+
+        // 为每个帖子查询图片
+        postListVOS.forEach(postListVO -> {
+            postListVO.setImages(postImageService.find(postListVO.getId()).stream().map(postImage -> {
+                return postImage.getImagePath();
+            }).collect(Collectors.toList()));
+        });
+
+        return new PageVO<>(total, postListVOS);
+    }
 }

@@ -6,7 +6,7 @@ import com.dewmark.smartcampuscommunity.pojo.vo.PageVO;
 import com.dewmark.smartcampuscommunity.pojo.vo.PostDetailVO;
 import com.dewmark.smartcampuscommunity.pojo.vo.PostListVO;
 
-public interface PostService{
+public interface PostService {
     void savePost(PostSaveDTO postSaveDTO);
 
     PageVO<PostListVO> page(PostQueryDTO postQueryDTO);
@@ -16,4 +16,6 @@ public interface PostService{
     void setLike(Long id);
 
     PostDetailVO showDetail(Long postId);
+
+    PageVO<PostListVO> pageLikedPosts(PostQueryDTO postQueryDTO);
 }

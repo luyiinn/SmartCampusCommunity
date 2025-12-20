@@ -105,4 +105,20 @@ public class PostController {
         return Result.success(postDetailVO);
     }
 
+    /**
+     * 获取用户已点赞帖子列表
+     * @param postQueryDTO
+     * @return com.dewmark.smartcampuscommunity.result.Result<com.dewmark.smartcampuscommunity.pojo.vo.PageVO<com.dewmark.smartcampuscommunity.pojo.vo.PostListVO>>
+     * @author dewMark
+     * @create 19/12/2025
+     **/
+    @GetMapping("/liked-list")
+    public Result<PageVO<PostListVO>> getLikedPostList(PostQueryDTO postQueryDTO) {
+        if (postQueryDTO == null) {
+            throw new DataNotIlegalException(MessageConstant.DATA_UNILEGAL);
+        }
+        PageVO<PostListVO> likedPostList = postService.pageLikedPosts(postQueryDTO);
+        return Result.success(likedPostList);
+    }
+
 }

@@ -19,6 +19,10 @@ public interface PostMapper extends BaseMapper<Post> {
 
     List<PostListVO> selectPostListWithSummary(PostQueryBO queryBO);
 
+    Long selectLikedPostCount(PostQueryBO queryBO);
+
+    List<PostListVO> selectLikedPostListWithSummary(PostQueryBO queryBO);
+
     @Update("UPDATE post SET comment_count = comment_count + 1 WHERE id = #{id}")
     Integer commentCountUp(Long id);
 }
