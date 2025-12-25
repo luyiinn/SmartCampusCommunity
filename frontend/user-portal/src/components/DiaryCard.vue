@@ -1,6 +1,6 @@
 <template>
     <div class="diary-card" @click="handleCardClick">
-        <!-- 日志内容区域 -->
+        <!-- 日记内容区域 -->
         <div class="diary-content">
             <h2 class="diary-title">{{ diary.title }}</h2>
             <p class="diary-text">{{ diary.contentSummary }}</p>
@@ -46,7 +46,7 @@ import { Star, View } from "@element-plus/icons-vue";
 import { useUserStore } from "../stores/userStore";
 import axios from "axios";
 
-// 日志数据接口
+// 日记数据接口
 export interface DiaryData {
     id: number;
     title: string;
@@ -163,18 +163,18 @@ const toggleLike = async () => {
     localLikeStatus.value.likeCount += newIsLike === 1 ? 1 : -1;
 
     try {
-            // 调用日记点赞接口
-            const response = await axios.post(`/diary/like/${props.diary.id}`, null, {
-                headers: { token: ` ${userStore.token}` }
-            });
+        // 调用日记点赞接口
+        const response = await axios.post(`/diary/like/${props.diary.id}`, null, {
+            headers: { token: ` ${userStore.token}` }
+        });
 
-            if (response.data.code !== 1) {
-                throw new Error(response.data.message);
-            }
+        if (response.data.code !== 1) {
+            throw new Error(response.data.message);
+        }
 
-            emit("update:like-status", props.diary.id, newIsLike);
+        emit("update:like-status", props.diary.id, newIsLike);
 
-        } catch (error) {
+    } catch (error) {
         // 回滚
         localLikeStatus.value.isLike = oldIsLike;
         localLikeStatus.value.likeCount = oldLikeCount;

@@ -8,7 +8,7 @@ public class DiaryImage {
 
     private Long id;           // 主键ID
 
-    private Long diaryId;      // 所属日志ID（没有外键约束）
+    private Long diaryId;      // 所属日记ID（没有外键约束）
 
     private String imagePath;  // 图片存储路径
 

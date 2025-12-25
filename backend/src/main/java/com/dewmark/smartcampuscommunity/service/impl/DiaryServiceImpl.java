@@ -28,7 +28,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 /**
- * @description: 日志板块实现类
+ * @description: 日记板块实现类
  * @author: dewMark
  * @date: 2025/11/30
  **/
@@ -48,7 +48,7 @@ public class DiaryServiceImpl implements DiaryService {
     }
 
     /**
-     * 根据年份获取该用户日志记录情况
+     * 根据年份获取该用户日记记录情况
      * 
      * @param year
      * @return com.dewmark.smartcampuscommunity.pojo.vo.DiaryDateVO
@@ -73,7 +73,7 @@ public class DiaryServiceImpl implements DiaryService {
     }
 
     /**
-     * 日志分页查询
+     * 日记分页查询
      * 
      * @param diaryQueryDTO
      * @return com.dewmark.smartcampuscommunity.pojo.vo.PageVO<com.dewmark.smartcampuscommunity.pojo.vo.DiaryListVO>
@@ -93,6 +93,7 @@ public class DiaryServiceImpl implements DiaryService {
                 .keyword(diaryQueryDTO.getKeyword())
                 .userId(diaryQueryDTO.getUserId())
                 .limit(diaryQueryDTO.getSize())
+                .isPublic(diaryQueryDTO.getIsPublic())
                 .build();
 
         // 若为当前用户则查询所有列表数据，如不是则仅展示公开数据
@@ -171,10 +172,10 @@ public class DiaryServiceImpl implements DiaryService {
         diary.setCreatedAt(now);
         diary.setUpdatedAt(now);
 
-        // 保存日志基本信息
+        // 保存日记基本信息
         diaryMapper.insert(diary);
 
-        // 保存日志图片
+        // 保存日记图片
         List<String> images = diarySaveDTO.getImages();
         if (images != null && !images.isEmpty()) {
             List<DiaryImage> diaryImages = new ArrayList<>();

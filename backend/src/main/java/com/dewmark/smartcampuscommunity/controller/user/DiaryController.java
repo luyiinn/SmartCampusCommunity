@@ -17,7 +17,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 /**
- * @description: 日志板块控制器类
+ * @description: 日记板块控制器类
  * @author: dewMark
  * @date: 2025/11/30
  **/
@@ -34,7 +34,7 @@ public class DiaryController {
     }
 
     /**
-     * 查询用户日志记录日期情况
+     * 查询用户日记记录日期情况
      * 
      * @param year
      * @return com.dewmark.smartcampuscommunity.result.Result<com.dewmark.smartcampuscommunity.pojo.vo.DiaryDateVO>
@@ -43,7 +43,7 @@ public class DiaryController {
      **/
     @GetMapping("/dates")
     public Result<DiaryDateVO> getDate(@RequestParam Integer year) {
-        log.info("查询用户日志记录日期情况，年份：{}", year);
+        log.info("查询用户日记记录日期情况，年份：{}", year);
 
         if (year == null || year.equals("")) {
             throw new DataNotIlegalException(MessageConstant.DATA_UNILEGAL);
@@ -55,7 +55,7 @@ public class DiaryController {
     }
 
     /**
-     * 获取日志分页列表
+     * 获取日记分页列表
      * 
      * @param diaryQueryDTO
      * @return com.dewmark.smartcampuscommunity.result.Result<com.dewmark.smartcampuscommunity.pojo.vo.PageVO<com.dewmark.smartcampuscommunity.pojo.vo.DiaryListVO>>
@@ -64,7 +64,7 @@ public class DiaryController {
      **/
     @GetMapping("/list")
     public Result<PageVO<DiaryListVO>> getDiaryList(DiaryQueryDTO diaryQueryDTO) {
-        log.info("查看用户日志列表，{}", diaryQueryDTO);
+        log.info("查看用户日记列表，{}", diaryQueryDTO);
 
         if (diaryQueryDTO == null || diaryQueryDTO.equals("")) {
             throw new DataNotIlegalException(MessageConstant.DATA_UNILEGAL);
@@ -76,16 +76,16 @@ public class DiaryController {
     }
 
     /**
-     * 切换日志点赞状态
+     * 切换日记点赞状态
      * 
-     * @param diaryId 日志ID
+     * @param diaryId 日记ID
      * @return com.dewmark.smartcampuscommunity.result.Result<java.lang.Byte>
      * @author dewMark
      * @create 19/12/2025
      **/
     @PostMapping("/like/{diaryId}")
     public Result<Byte> toggleDiaryLikeStatus(@PathVariable Long diaryId) {
-        log.info("切换日志点赞状态，日志ID：{}", diaryId);
+        log.info("切换日记点赞状态，日记ID：{}", diaryId);
 
         if (diaryId == null) {
             throw new DataNotIlegalException(MessageConstant.DATA_UNILEGAL);
@@ -96,7 +96,7 @@ public class DiaryController {
     }
 
     /**
-     * 新增日志
+     * 新增日记
      * 
      * @param diarySaveDTO
      * @return com.dewmark.smartcampuscommunity.result.Result
@@ -108,7 +108,7 @@ public class DiaryController {
         if (diarySaveDTO == null) {
             throw new DataNotIlegalException(MessageConstant.DATA_UNILEGAL);
         }
-        log.info("发布日志: {}", diarySaveDTO);
+        log.info("发布日记: {}", diarySaveDTO);
         diaryService.saveDiary(diarySaveDTO);
         return Result.success();
     }

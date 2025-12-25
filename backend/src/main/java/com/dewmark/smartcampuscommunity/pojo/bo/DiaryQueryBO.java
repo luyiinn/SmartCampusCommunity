@@ -40,4 +40,9 @@ public class DiaryQueryBO {
      */
     private Integer isOneSelf;
 
+    /**
+     * 是否仅查询公开日记
+     */
+    private Boolean isPublic;
+
 }

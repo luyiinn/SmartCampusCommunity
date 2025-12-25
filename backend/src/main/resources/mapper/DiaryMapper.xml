@@ -38,6 +38,9 @@
         <if test="isOneSelf != null and isOneSelf == 0">
             AND is_public = true
         </if>
+        <if test="isPublic != null">
+            AND is_public = #{isPublic}
+        </if>
         ORDER BY created_at DESC
         LIMIT #{offset}, #{limit}
     </select>
@@ -54,6 +57,9 @@
         </if>
         <if test="isOneSelf != null and isOneSelf == 0">
             AND is_public = true
+        </if>
+        <if test="isPublic != null">
+            AND is_public = #{isPublic}
         </if>
     </select>
 </mapper>

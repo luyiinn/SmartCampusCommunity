@@ -5,51 +5,24 @@
         <h2 class="title">{{ title }}</h2>
       </div>
       <div class="search-container">
-        <el-input
-          v-model="searchText"
-          placeholder="搜索日志..."
-          :prefix-icon="Search"
-          class="search-input"
-          clearable
-          @clear="handleClearSearch"
-          @keyup.enter="handleSearch"
-          @input="handleInput"
-        >
+        <el-input v-model="searchText" placeholder="搜索日记..." :prefix-icon="Search" class="search-input" clearable
+          @clear="handleClearSearch" @keyup.enter="handleSearch" @input="handleInput">
         </el-input>
-        <el-button
-          type="primary"
-          :icon="Search"
-          @click="handleSearch"
-          circle
-          class="search-button"
-        ></el-button>
+        <el-button type="primary" :icon="Search" @click="handleSearch" circle class="search-button"></el-button>
       </div>
     </header>
 
     <section class="diary-list-body" ref="listBodyRef" @scroll="handleScroll">
       <slot name="default" :items="items">
-        <el-empty
-          v-if="!loading && items.length === 0"
-          description="暂无日志"
-        ></el-empty>
+        <el-empty v-if="!loading && items.length === 0" description="暂无日记"></el-empty>
 
         <div v-else class="items-container">
-          <DiaryCard
-            v-for="item in items"
-            :key="item.id"
-            :diary="item"
-            @click="emitSelect(item)"
-            @update:like-status="handleLikeStatusUpdate"
-          />
+          <DiaryCard v-for="item in items" :key="item.id" :diary="item" @click="emitSelect(item)"
+            @update:like-status="handleLikeStatusUpdate" />
         </div>
 
         <!-- 初始加载中 -->
-        <el-skeleton
-          v-if="loading && items.length === 0"
-          :rows="4"
-          animated
-          class="mt-4"
-        />
+        <el-skeleton v-if="loading && items.length === 0" :rows="4" animated class="mt-4" />
       </slot>
 
       <!-- 加载更多状态 -->
@@ -89,7 +62,7 @@ const emit = defineEmits<{
 
 const searchText = ref("");
 const listBodyRef = ref<HTMLElement>();
-const title = computed(() => props.title ?? "日志列表");
+const title = computed(() => props.title ?? "日记列表");
 const items = computed(() => props.items ?? []);
 
 // 搜索处理
@@ -138,7 +111,8 @@ const handleLikeStatusUpdate = (id: number, isLike: number) => {
   box-shadow: 0 4px 16px rgba(0, 0, 0, 0.06);
   display: flex;
   flex-direction: column;
-  height: 600px; /* 固定高度或者由父容器决定，这里给个默认高度以便滚动 */
+  height: 600px;
+  /* 固定高度或者由父容器决定，这里给个默认高度以便滚动 */
 }
 
 :deep(.el-card__body) {

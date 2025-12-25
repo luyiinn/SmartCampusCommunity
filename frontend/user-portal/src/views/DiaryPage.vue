@@ -2,31 +2,22 @@
   <div class="square-page">
     <div class="square-header">
       <div class="header-content">
-        <h1>个人日志</h1>
-        <p class="subtitle">记录每日写作情况与日志列表</p>
+        <h1>个人日记</h1>
+        <p class="subtitle">记录每日写作情况与日记列表</p>
       </div>
-      <el-button type="primary" class="publish-btn" @click="showPublishDialog"
-        >发布日志</el-button
-      >
+      <el-button type="primary" class="publish-btn" @click="showPublishDialog">发布日记</el-button>
     </div>
 
-    <!-- 日志热力图日历 -->
+    <!-- 日记热力图日历 -->
     <HeatmapCalendar :hasDataDates="hasDataDates" @update:year="updateYear" />
 
     <div class="diary-list-container">
-      <DiaryList
-        :items="diaryList"
-        :loading="loading"
-        :has-more="hasMore"
-        :loading-more="loadingMore"
-        @search="handleSearch"
-        @load-more="handleLoadMore"
-        @select="handleSelectDiary"
-        @update:like-status="handleLikeStatusUpdate"
-      />
+      <DiaryList :items="diaryList" :loading="loading" :has-more="hasMore" :loading-more="loadingMore"
+        @search="handleSearch" @load-more="handleLoadMore" @select="handleSelectDiary"
+        @update:like-status="handleLikeStatusUpdate" />
     </div>
 
-    <!-- 发布日志对话框 -->
+    <!-- 发布日记对话框 -->
     <DiaryPublishDialog v-model:visible="publishDialogVisible" />
   </div>
 </template>
@@ -45,15 +36,15 @@ import { ElMessage } from "element-plus";
 const userStore = useUserStore();
 const route = useRoute();
 
-// 发布日志对话框控制
+// 发布日记对话框控制
 const publishDialogVisible = ref(false);
 
-// 显示发布日志对话框
+// 显示发布日记对话框
 const showPublishDialog = () => {
   publishDialogVisible.value = true;
 };
 
-// 日志列表数据
+// 日记列表数据
 const diaryList = ref<DiaryData[]>([]);
 const loading = ref(false);
 const loadingMore = ref(false);
@@ -67,14 +58,14 @@ const keyword = ref("");
 watch(
   () => route.query._t,
   () => {
-    console.log("检测到用户状态变化，刷新日志页面");
+    console.log("检测到用户状态变化，刷新日记页面");
     // 重新获取数据
     loadHasDataDates();
     resetAndFetchDiaries();
   }
 );
 
-// 从API获取已写日志日期数据
+// 从API获取已写日记日期数据
 const generateHasDataDates = async (year?: number) => {
   try {
     const targetYear = year || new Date().getFullYear();
@@ -94,26 +85,26 @@ const generateHasDataDates = async (year?: number) => {
       return response.data.data?.dates || [];
     } else {
       // 失败时，显示错误信息
-      console.error("获取日志日期数据失败:", response.data.message);
-      ElMessage.error(response.data.message || "获取日志数据失败，请稍后重试");
+      console.error("获取日记日期数据失败:", response.data.message);
+      ElMessage.error(response.data.message || "获取日记数据失败，请稍后重试");
       return [];
     }
   } catch (error) {
-    console.error("获取日志日期数据失败:", error);
-    ElMessage.error("获取日志数据失败，请稍后重试");
+    console.error("获取日记日期数据失败:", error);
+    ElMessage.error("获取日记数据失败，请稍后重试");
     return [];
   }
 };
 
-// 已写日志日期列表（格式：YYYY-MM-DD）
+// 已写日记日期列表（格式：YYYY-MM-DD）
 const hasDataDates = ref<string[]>([]);
 
-// 加载日志日期数据的函数
+// 加载日记日期数据的函数
 const loadHasDataDates = async (year?: number) => {
   hasDataDates.value = await generateHasDataDates(year);
 };
 
-// 获取日志列表
+// 获取日记列表
 const fetchDiaries = async (isLoadMore = false) => {
   if (isLoadMore) {
     loadingMore.value = true;
@@ -153,18 +144,18 @@ const fetchDiaries = async (isLoadMore = false) => {
       // 判断是否还有更多数据
       hasMore.value = diaryList.value.length < total.value;
     } else {
-      ElMessage.error(response.data.msg || "获取日志列表失败");
+      ElMessage.error(response.data.msg || "获取日记列表失败");
     }
   } catch (error) {
-    console.error("获取日志列表失败:", error);
-    ElMessage.error("获取日志列表失败，请稍后重试");
+    console.error("获取日记列表失败:", error);
+    ElMessage.error("获取日记列表失败，请稍后重试");
   } finally {
     loading.value = false;
     loadingMore.value = false;
   }
 };
 
-// 重置并重新获取日志
+// 重置并重新获取日记
 const resetAndFetchDiaries = () => {
   page.value = 1;
   hasMore.value = true;
@@ -186,10 +177,10 @@ const handleLoadMore = () => {
   }
 };
 
-// 处理点击日志
+// 处理点击日记
 const handleSelectDiary = (item: DiaryData) => {
-  console.log("点击日志:", item);
-  // 这里可以跳转到日志详情页，目前暂无需求
+  console.log("点击日记:", item);
+  // 这里可以跳转到日记详情页，目前暂无需求
 };
 
 // 处理点赞状态更新
@@ -238,13 +229,13 @@ const updateYear = async (year: number) => {
   flex: 1;
 }
 
-.header-content > h1 {
+.header-content>h1 {
   margin: 0;
   font-size: 22px;
   color: #0f766e;
 }
 
-.header-content > .subtitle {
+.header-content>.subtitle {
   margin: 6px 0 0 0;
   font-size: 13px;
   color: #6b7280;

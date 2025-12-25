@@ -4,7 +4,7 @@ import lombok.Data;
 import java.time.LocalDateTime;
 
 /**
- * 日志实体类
+ * 日记实体类
  * @author dewMark
  * @create 30/11/2025
  **/

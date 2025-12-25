@@ -6,7 +6,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 /**
- * @description: 日志列表查询响应
+ * @description: 日记列表查询响应
  * @author: dewMark
  * @date: 2025/12/08
  **/
@@ -14,7 +14,7 @@ import java.util.List;
 public class DiaryListVO {
 
     /**
-     * 日志ID
+     * 日记ID
      */
     private Long id;
 

@@ -3,7 +3,7 @@ package com.dewmark.smartcampuscommunity.pojo.dto;
 import lombok.Data;
 
 /**
- * @description: 日志分页查询
+ * @description: 日记分页查询
  * @author: dewMark
  * @date: 2025/12/08
  **/
@@ -26,8 +26,13 @@ public class DiaryQueryDTO {
     private Integer size;
 
     /**
-     * 用户ID（可选，用于查询特定用户的日志）
+     * 用户ID（可选，用于查询特定用户的日记）
      */
     private Long userId;
+
+    /**
+     * 是否仅查询公开日记（可选，true: 仅公开，false: 全部）
+     */
+    private Boolean isPublic;
 
 }
