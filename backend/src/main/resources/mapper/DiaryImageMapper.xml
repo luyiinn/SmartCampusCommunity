@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.dewmark.smartcampuscommunity.mapper.DiaryImageMapper">
+
+    <insert id="saveBatch" parameterType="java.util.List">
+        insert into diary_images(diary_id, image_path, created_at)
+        values
+        <foreach collection="list" item="item" separator=",">
+            (#{item.diaryId}, #{item.imagePath}, #{item.createdAt})
+        </foreach>
+    </insert>
+
+</mapper>
