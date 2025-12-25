@@ -43,6 +43,7 @@ public class PostServiceImpl implements PostService {
     private final UsersService usersService;
     private final UserPostLikeMapper userPostLikeMapper;
     private final PostImageService postImageService;
+
     @Autowired
     public PostServiceImpl(
             PostMapper postMapper,
@@ -63,13 +64,14 @@ public class PostServiceImpl implements PostService {
 
     /**
      * 发布新帖子业务层逻辑
+     * 
      * @param postSaveDTO
      * @return void
      * @author dewMark
      * @create 16/11/2025
      **/
     @Override
-    @Transactional(rollbackFor = Exception.class)// 明确指定回滚的异常类型
+    @Transactional(rollbackFor = Exception.class) // 明确指定回滚的异常类型
     public void savePost(PostSaveDTO postSaveDTO) {
         // 新增帖子
         Post post = new Post()
@@ -99,7 +101,7 @@ public class PostServiceImpl implements PostService {
             for (Long tagId : tags) {
                 PostTag postTag = new PostTag();
                 postTag.setTagId(tagId);
-                postTag.setPostId(postId);  // 使用回填的主键
+                postTag.setPostId(postId); // 使用回填的主键
                 postTags.add(postTag);
             }
 
@@ -111,7 +113,7 @@ public class PostServiceImpl implements PostService {
         }
 
         // 标签使用次数加 1
-        postSaveDTO.getTags().forEach(tagId->{
+        postSaveDTO.getTags().forEach(tagId -> {
             tagMapper.useCountUp(tagId);
         });
 
@@ -131,7 +133,8 @@ public class PostServiceImpl implements PostService {
     }
 
     /**
-     *  帖子分页查询
+     * 帖子分页查询
+     * 
      * @param postQueryDTO
      * @return com.dewmark.smartcampuscommunity.pojo.vo.PageVO<com.dewmark.smartcampuscommunity.pojo.vo.PostListVO>
      * @author dewMark
@@ -160,17 +163,15 @@ public class PostServiceImpl implements PostService {
             vo.setTags(tagMapper.selectTagNamesByPostId(vo.getId()));
         }
 
-
-
         // 为每个帖子查询用户头像和名称，以及是否已点赞
         postListVOS.forEach(postListVO -> {
-            Users user = usersService.findByUserId(postListVO.getUserId());
+            Users user = usersService.getUserById(postListVO.getUserId());
             postListVO.setUserName(user.getUsername());
             postListVO.setAvatar(user.getAvatar());
             Integer isLike = 0;
             List<UserPostLike> exist = userPostLikeMapper.isExist(BaseContext.getCurrentId(), postListVO.getId());
             if (exist != null && !exist.isEmpty()) {
-                if (exist.get(0).getLikeStatus() == 1){
+                if (exist.get(0).getLikeStatus() == 1) {
                     isLike = 1;
                 }
             }
@@ -188,9 +189,9 @@ public class PostServiceImpl implements PostService {
 
     }
 
-
     /**
      * 评论数+1
+     * 
      * @return void
      * @author dewMark
      * @create 24/11/2025
@@ -198,13 +199,14 @@ public class PostServiceImpl implements PostService {
     @Override
     public void commentCountUp(Long id) {
         Integer i = postMapper.commentCountUp(id);
-        if (i != 1){
+        if (i != 1) {
             throw new BaseException(MessageConstant.DATABASE_OPRATE);
         }
     }
 
     /**
      * 点赞OR取消点赞
+     * 
      * @return void
      * @author dewMark
      * @create 27/11/2025
@@ -237,10 +239,10 @@ public class PostServiceImpl implements PostService {
 
                 // 帖子点赞数+1
                 postMapper.updateById(new Post()
-                                .builder()
-                                .id(postId)
-                                .likeCount(post.getLikeCount() - 1)
-                                .build());
+                        .builder()
+                        .id(postId)
+                        .likeCount(post.getLikeCount() - 1)
+                        .build());
 
             } else {
                 // 当前是取消点赞状态，执行重新点赞
@@ -278,6 +280,7 @@ public class PostServiceImpl implements PostService {
 
     /**
      * 展示帖子详情
+     * 
      * @param postId
      * @return com.dewmark.smartcampuscommunity.pojo.vo.PostDetailVO
      * @author dewMark
@@ -287,7 +290,7 @@ public class PostServiceImpl implements PostService {
     public PostDetailVO showDetail(Long postId) {
         Post post = postMapper.selectById(postId);
         // 查找用户用于查找用户名与头像
-        Users users = usersService.findByUserId(post.getUserId());
+        Users users = usersService.getUserById(post.getUserId());
         // 查找帖子下标签
         List<String> tags = tagMapper.selectTagNamesByPostId(postId);
         // 查找图片集合
@@ -295,8 +298,7 @@ public class PostServiceImpl implements PostService {
             return postImage.getImagePath();
         }).collect(Collectors.toList());
 
-        PostDetailVO postDetailVO
-                = new PostDetailVO()
+        PostDetailVO postDetailVO = new PostDetailVO()
                 .builder()
                 .id(postId)
                 .avatar(users.getAvatar())
@@ -304,7 +306,7 @@ public class PostServiceImpl implements PostService {
                 .images(images)
                 .tags(tags)
                 .build();
-        BeanUtils.copyProperties(post,postDetailVO);
+        BeanUtils.copyProperties(post, postDetailVO);
 
         // 点赞关系
         // 确认非空再判点赞
@@ -314,7 +316,7 @@ public class PostServiceImpl implements PostService {
         if (userPostLikes != null && !userPostLikes.isEmpty()) {
             UserPostLike latestRecord = userPostLikes.get(0);
             currentStatus = latestRecord.getLikeStatus();
-        }else {
+        } else {
             currentStatus = 0;
         }
         postDetailVO.setIsLike(currentStatus);
@@ -351,13 +353,13 @@ public class PostServiceImpl implements PostService {
 
         // 为每个帖子查询用户头像和名称，以及是否已点赞
         postListVOS.forEach(postListVO -> {
-            Users user = usersService.findByUserId(postListVO.getUserId());
+            Users user = usersService.getUserById(postListVO.getUserId());
             postListVO.setUserName(user.getUsername());
             postListVO.setAvatar(user.getAvatar());
             Integer isLike = 0;
             List<UserPostLike> exist = userPostLikeMapper.isExist(BaseContext.getCurrentId(), postListVO.getId());
             if (exist != null && !exist.isEmpty()) {
-                if (exist.get(0).getLikeStatus() == 1){
+                if (exist.get(0).getLikeStatus() == 1) {
                     isLike = 1;
                 }
             }

@@ -15,7 +15,7 @@
 </template>
 
 <script setup lang="ts">
-import { watch, onMounted } from 'vue';
+import { watch } from 'vue';
 import { useRouter } from 'vue-router';
 import TopNavBar from "./components/TopNavBar.vue";
 import { useUserStore } from "./stores/userStore";
@@ -37,11 +37,6 @@ watch(
     });
   }
 );
-
-// 页面加载时，检查用户登录状态并初始化
-onMounted(() => {
-  console.log('应用初始化，检查用户登录状态');
-});
 </script>
 
 <style>

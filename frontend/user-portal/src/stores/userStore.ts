@@ -1,11 +1,17 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import axios from 'axios'
 
 export interface UserInfo {
   id: number | null
   userName: string
   token: string
   avatar?: string | null
+  email?: string
+  phone?: string
+  studentId?: number
+  createdAt?: string
+  updatedAt?: string
 }
 
 export const useUserStore = defineStore('user', () => {
@@ -49,7 +55,7 @@ export const useUserStore = defineStore('user', () => {
       }
     }
     
-    user.value = { 
+  user.value = { 
     id: payload.id, 
     userName: payload.userName, 
     token: payload.token || '', 
@@ -93,6 +99,103 @@ export const useUserStore = defineStore('user', () => {
     return r
   }
 
+  // 获取用户信息
+  async function fetchUserInfo() {
+    if (!user.value.id) return
+    
+    try {
+      const response = await axios.get(`/user/${user.value.id}`, {
+        headers: {
+          token: ` ${token.value}`,
+        },
+        timeout: 10000,
+      })
+
+      if (response.data && response.data.code === 1 && response.data.data) {
+        const userData = response.data.data
+        return userData
+      }
+    } catch (error) {
+      console.error('获取用户信息失败:', error)
+      throw error
+    }
+  }
+
+  // 上传图片
+  async function uploadImage(file: File | undefined) {
+    if (!file) {
+      throw new Error("文件不存在")
+    }
+    try {
+      const formData = new FormData()
+      formData.append("file", file)
+
+      // 调用上传接口
+      const response = await axios.post("/upload", formData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+        },
+        timeout: 10000,
+      })
+
+      // 从响应中提取URL并返回
+      if (response.data && response.data.url) {
+        let url = response.data.url
+
+        // 处理URL格式
+        if (url.startsWith("http://") || url.startsWith("https://")) {
+          // 完整URL保持不变
+          return url
+        } else if (url.startsWith("/uploads")) {
+          // 已经是正确的/uploads开头路径
+          return url
+        } else if (url.startsWith("uploads")) {
+          // 添加前导斜杠
+          return `/${url}`
+        } else {
+          // 对于其他情况，确保以/uploads开头
+          return url.includes("uploads")
+            ? url.startsWith("/")
+              ? url
+              : `/${url}`
+            : `/uploads/${url}`
+        }
+      } else {
+        throw new Error("上传成功但未返回图片URL")
+      }
+      
+    } catch (error) {
+      console.error("图片上传失败:", error)
+      throw new Error((error as any)?.response?.data?.message || "图片上传失败，请重试")
+    }
+  }
+
+  // 更新用户信息
+  async function updateUserInfo(userData: Partial<Omit<UserInfo, 'id' | 'token'>>) {
+    if (!user.value.id) return false
+    
+    try {
+      const response = await axios.put('/user', 
+        { id: user.value.id, username: userData.userName, ...userData },
+        {
+          headers: {
+            token: ` ${token.value}`,
+          },
+          timeout: 10000,
+        }
+      )
+
+      if (response.data && response.data.code === 1) {
+        user.value = { ...user.value, ...userData }
+        return true
+      }
+      return false
+    } catch (error) {
+      console.error('更新用户信息失败:', error)
+      throw error
+    }
+  }
+
   return { 
     user, 
     token, 
@@ -113,7 +216,10 @@ export const useUserStore = defineStore('user', () => {
     setAuthModalVisible, 
     consumePendingRoute,
     refreshFlag,
-    triggerRefresh
+    triggerRefresh,
+    fetchUserInfo,
+    updateUserInfo,
+    uploadImage
   }
 }, {
   persist: true

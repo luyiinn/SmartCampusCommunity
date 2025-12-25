@@ -1,11 +1,17 @@
-﻿<template>
+<template>
   <div class="nav-content">
     <div class="nav-left">
       <img src="../assets/TCLogo.png" alt="" width="100px" />
       <span>迹云校园社区</span>
 
-      <el-menu :default-active="activeIndex" mode="horizontal" :ellipsis="false" @select="handleSelect" class="nav-menu"
-        active-text-color="#009688">
+      <el-menu
+        :default-active="activeIndex"
+        mode="horizontal"
+        :ellipsis="false"
+        @select="handleSelect"
+        class="nav-menu"
+        active-text-color="#009688"
+      >
         <el-menu-item index="/square">广场</el-menu-item>
         <el-menu-item index="/profile">个人主页</el-menu-item>
         <el-menu-item index="/diary">日记</el-menu-item>
@@ -16,8 +22,12 @@
       <div v-if="user.id">
         <el-dropdown @command="handleCommand">
           <div class="user-info">
-            <el-avatar :src="user.avatar || DEFAULT_AVATAR" :size="36" @error="handleAvatarError"
-              :alt="'用户头像：' + user.userName" />
+            <el-avatar
+              :src="user.avatar || DEFAULT_AVATAR"
+              :size="36"
+              @error="handleAvatarError"
+              :alt="'用户头像：' + user.userName"
+            />
             <span class="username">{{ user.userName }}</span>
           </div>
           <template #dropdown>
@@ -51,16 +61,32 @@
         </el-dropdown>
       </div>
       <div v-else class="auth-actions">
-        <el-button size="small" class="register-btn" @click="showRegisterDialog = true">注册</el-button>
-        <el-button size="small" class="login-btn" @click="showLoginDialog = true">登录</el-button>
+        <el-button
+          size="small"
+          class="register-btn"
+          @click="showRegisterDialog = true"
+          >注册</el-button
+        >
+        <el-button
+          size="small"
+          class="login-btn"
+          @click="showLoginDialog = true"
+          >登录</el-button
+        >
       </div>
     </div>
 
     <!-- 登录对话框组件 -->
-    <LoginDialog v-model:visible="showLoginDialog" @login-success="handleLoginSuccess" />
+    <LoginDialog
+      v-model:visible="showLoginDialog"
+      @login-success="handleLoginSuccess"
+    />
 
     <!-- 注册对话框组件 -->
-    <RegisterDialog v-model:visible="showRegisterDialog" @register-success="handleRegisterSuccess" />
+    <RegisterDialog
+      v-model:visible="showRegisterDialog"
+      @register-success="handleRegisterSuccess"
+    />
   </div>
 </template>
 
@@ -96,7 +122,10 @@ watch(
   () => userStore.user,
   (val) => {
     user.id = val?.id ?? null;
-    user.userName = val?.userName ?? "";
+    // 只有当新值存在时才更新，否则保留现有值
+    if (val?.userName) {
+      user.userName = val.userName;
+    }
     // 确保头像为空时使用默认头像，同时处理URL前缀问题
     if (val?.avatar) {
       // 检查是否已经是完整URL
@@ -119,8 +148,9 @@ watch(
         user.avatar = val.avatar;
       } else {
         // 对于其他情况，添加/api前缀并处理斜杠
-        user.avatar = `/api${val.avatar.startsWith("/") ? "" : "/"}${val.avatar
-          }`;
+        user.avatar = `/api${val.avatar.startsWith("/") ? "" : "/"}${
+          val.avatar
+        }`;
       }
     } else {
       user.avatar = DEFAULT_AVATAR;
@@ -169,7 +199,7 @@ const handleCommand = (command: string) => {
       localStorage.removeItem("user-store");
       localStorage.removeItem("token");
       localStorage.removeItem("rememberedUser");
-    } catch { }
+    } catch {}
     ElMessage({ message: "已退出登录", type: "success", duration: 1500 });
     router.push("/square");
     // 刷新页面以确保状态完全重置
@@ -177,6 +207,9 @@ const handleCommand = (command: string) => {
   } else if (command === "profile") {
     // 跳转到个人主页
     router.push("/profile");
+  } else if (command === "settings") {
+    // 跳转到设置页面
+    router.push("/settings");
   } else {
     // 处理其他命令逻辑
     console.log(`执行命令: ${command}`);
@@ -211,8 +244,9 @@ const handleLoginSuccess = () => {
       user.avatar = userStore.user.avatar;
     } else {
       // 对于其他情况，添加/api前缀并处理斜杠
-      user.avatar = `/api${userStore.user.avatar.startsWith("/") ? "" : "/"}${userStore.user.avatar
-        }`;
+      user.avatar = `/api${userStore.user.avatar.startsWith("/") ? "" : "/"}${
+        userStore.user.avatar
+      }`;
     }
   } else {
     user.avatar = DEFAULT_AVATAR;
@@ -260,8 +294,9 @@ const handleRegisterSuccess = (_data: Record<string, any>) => {
       user.avatar = userStore.user.avatar;
     } else {
       // 确保正确添加/api前缀并处理斜杠
-      user.avatar = `/api${userStore.user.avatar.startsWith("/") ? "" : "/"}${userStore.user.avatar
-        }`;
+      user.avatar = `/api${userStore.user.avatar.startsWith("/") ? "" : "/"}${
+        userStore.user.avatar
+      }`;
     }
   } else {
     user.avatar = DEFAULT_AVATAR;

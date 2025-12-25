@@ -39,6 +39,11 @@ const routes: Array<RouteRecordRaw> = [
     component: () => import("../views/PostDetail.vue"),
     meta: { title: "帖子详情" },
   },
+  {
+    path: "/settings",
+    component: () => import("../views/Settings.vue"),
+    meta: { title: "个人设置", requiresAuth: true },
+  },
 ];
 
 // 创建路由实例

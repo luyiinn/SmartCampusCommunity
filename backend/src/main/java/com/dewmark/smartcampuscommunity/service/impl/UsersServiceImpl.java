@@ -6,9 +6,11 @@ import com.dewmark.smartcampuscommunity.constent.MessageConstant;
 import com.dewmark.smartcampuscommunity.exception.AccountNotFoundException;
 import com.dewmark.smartcampuscommunity.exception.PasswordErrorException;
 import com.dewmark.smartcampuscommunity.mapper.UsersMapper;
+import com.dewmark.smartcampuscommunity.pojo.dto.UserUpdateDTO;
 import com.dewmark.smartcampuscommunity.pojo.dto.UsersLoginDTO;
 import com.dewmark.smartcampuscommunity.pojo.dto.UsersRegisterDTO;
 import com.dewmark.smartcampuscommunity.pojo.entity.Users;
+import com.dewmark.smartcampuscommunity.pojo.vo.UserInfoVO;
 import com.dewmark.smartcampuscommunity.pojo.vo.UserLoginVO;
 import com.dewmark.smartcampuscommunity.service.UsersService;
 import com.dewmark.smartcampuscommunity.utils.JwtUtil;
@@ -32,6 +34,7 @@ public class UsersServiceImpl implements UsersService {
 
     private final UsersMapper usersMapper;
     private final JwtProperties jwtProperties;
+
     @Autowired
     public UsersServiceImpl(
             UsersMapper usersMapper,
@@ -43,6 +46,7 @@ public class UsersServiceImpl implements UsersService {
     /**
      *
      * 注册用户
+     * 
      * @param usersRegisterDTO
      * @return void
      * @author dewMark
@@ -51,16 +55,15 @@ public class UsersServiceImpl implements UsersService {
     @Override
     public void save(UsersRegisterDTO usersRegisterDTO) {
         Users users = new Users();
-        BeanUtils.copyProperties(usersRegisterDTO,users);
+        BeanUtils.copyProperties(usersRegisterDTO, users);
         users.setCreatedAt(LocalDateTime.now());
         users.setUpdatedAt(LocalDateTime.now());
         int res = usersMapper.insert(users);
-        if(res > 0){
-            log.info("用户{}注册成功",users.getId());
+        if (res > 0) {
+            log.info("用户{}注册成功", users.getId());
         }
 
     }
-
 
     /**
      * 处理登录逻辑
@@ -78,12 +81,12 @@ public class UsersServiceImpl implements UsersService {
         Users users = usersMapper.selectUserByName(username);
 
         // 用户存在验证
-        if(users == null){
+        if (users == null) {
             throw new AccountNotFoundException(MessageConstant.ACCOUNT_NOT_FOUND);
         }
 
         // 密码验证
-        if(!password.equals(users.getPassword())){
+        if (!password.equals(users.getPassword())) {
             throw new PasswordErrorException(MessageConstant.PASSWORD_ERROR);
         }
 
@@ -94,7 +97,7 @@ public class UsersServiceImpl implements UsersService {
                 jwtProperties.getUserSecretKey(),
                 jwtProperties.getUserTtl(),
                 claims);
-        log.info("用户{}登录成功，token{}",users.getUsername(),token);
+        log.info("用户{}登录成功，token{}", users.getUsername(), token);
         UserLoginVO userLoginVO = UserLoginVO.builder()
                 .id(users.getId())
                 .userName(users.getUsername())
@@ -106,8 +109,43 @@ public class UsersServiceImpl implements UsersService {
     }
 
     @Override
-    public Users findByUserId(Long id) {
+    public UserInfoVO findByUserId(Long id) {
         Users users = usersMapper.selectById(id);
-        return users;
+        if (users == null) {
+            return null;
+        }
+        // 将Users转换为UserInfoVO，不包含密码信息
+        UserInfoVO userInfoVO = UserInfoVO.builder()
+                .id(users.getId())
+                .username(users.getUsername())
+                .avatar(users.getAvatar())
+                .email(users.getEmail())
+                .phone(users.getPhone())
+                .studentId(users.getStudentId())
+                .createdAt(users.getCreatedAt())
+                .updatedAt(users.getUpdatedAt())
+                .build();
+        return userInfoVO;
+    }
+
+    @Override
+    public Users getUserById(Long id) {
+        // 直接返回Users对象，包含所有信息（包括密码）
+        return usersMapper.selectById(id);
+    }
+
+    @Override
+    public void updateUser(UserUpdateDTO userUpdateDTO) {
+        Users users = new Users();
+        // 复制UserUpdateDTO的属性到Users对象
+        users.setId(userUpdateDTO.getId());
+        users.setUsername(userUpdateDTO.getUsername());
+        users.setAvatar(userUpdateDTO.getAvatar());
+        users.setEmail(userUpdateDTO.getEmail());
+        users.setPhone(userUpdateDTO.getPhone());
+        users.setStudentId(userUpdateDTO.getStudentId());
+        users.setUpdatedAt(java.time.LocalDateTime.now());
+        // 使用MybatisPlus的updateById方法更新用户信息，不会修改密码字段
+        usersMapper.updateById(users);
     }
 }
