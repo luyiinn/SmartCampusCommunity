@@ -4,11 +4,15 @@
       <h3 class="calendar-title">{{ title }}</h3>
       <div class="calendar-nav">
         <el-button size="small" @click="prevYear">
-          <el-icon><ArrowLeft /></el-icon>
+          <el-icon>
+            <ArrowLeft />
+          </el-icon>
         </el-button>
         <span class="current-year">{{ currentYear }}</span>
         <el-button size="small" @click="nextYear">
-          <el-icon><ArrowRight /></el-icon>
+          <el-icon>
+            <ArrowRight />
+          </el-icon>
         </el-button>
       </div>
     </div>
@@ -34,34 +38,20 @@
 
           <!-- 日历网格 -->
           <div class="calendar-grid">
-            <div
-              v-for="(day, index) in calendarData"
-              :key="index"
-              :class="[
-                'calendar-cell',
-                { 'has-data': day.hasData },
-                { 'current-date': isCurrentDate(day.date) },
-                { 'other-month': day.isOtherMonth },
-              ]"
-              :style="{ gridRow: day.weekday + 1 }"
-              @mouseover="handleMouseOver(day, $event)"
-              @mouseleave="handleMouseLeave"
-              :data-date="day.fullDate"
-              :data-hasdata="day.hasData"
-            />
+            <div v-for="(day, index) in calendarData" :key="index" :class="[
+              'calendar-cell',
+              { 'has-data': day.hasData },
+              { 'current-date': isCurrentDate(day.date) },
+              { 'other-month': day.isOtherMonth },
+            ]" :style="{ gridRow: day.weekday + 1 }" @mouseover="handleMouseOver(day, $event)"
+              @mouseleave="handleMouseLeave" :data-date="day.fullDate" :data-hasdata="day.hasData" />
           </div>
 
           <!-- 悬停提示 - 移到calendar-grid外部 -->
-          <div
-            v-if="tooltip.visible"
-            class="tooltip"
-            :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }"
-          >
+          <div v-if="tooltip.visible" class="tooltip" :style="{ left: tooltip.x + 'px', top: tooltip.y + 'px' }">
             {{ tooltip.date }}
-            <span v-if="tooltip.hasData" class="tooltip-status has-data"
-              >已写日志</span
-            >
-            <span v-else class="tooltip-status no-data">未写日志</span>
+            <span v-if="tooltip.hasData" class="tooltip-status has-data">已写日记</span>
+            <span v-else class="tooltip-status no-data">未写日记</span>
           </div>
         </div>
       </div>
@@ -81,7 +71,7 @@ interface Props {
 
 const props = withDefaults(defineProps<Props>(), {
   year: () => new Date().getFullYear(),
-  title: "日志记录热力图",
+  title: "日记记录热力图",
   hasDataDates: () => [],
 });
 

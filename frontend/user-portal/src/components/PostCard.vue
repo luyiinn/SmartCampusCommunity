@@ -2,15 +2,10 @@
   <div class="post-card" @click="handleCardClick">
     <!-- 用户信息区域 -->
     <div class="user-info">
-      <el-avatar
-        :src="getAvatarUrl(post.user.avatarUrl)"
-        :size="40"
-        class="user-avatar"
-        :icon="userIcon"
-        @error="handleAvatarError"
-      ></el-avatar>
+      <el-avatar :src="getAvatarUrl(post.user.avatarUrl)" :size="40" class="user-avatar clickable-avatar"
+        :icon="userIcon" @error="handleAvatarError" @click.stop="navigateToUserProfile"></el-avatar>
       <div class="user-details">
-        <h3 class="user-name">{{ post.user.name }}</h3>
+        <h3 class="user-name clickable-name" @click.stop="navigateToUserProfile">{{ post.user.name }}</h3>
         <p class="post-time">{{ formatTime(post.createTime) }}</p>
       </div>
     </div>
@@ -22,31 +17,17 @@
 
       <!-- 图片展示区域 -->
       <div v-if="post.images && post.images.length > 0" class="post-images">
-        <div
-          v-for="(image, index) in post.images"
-          :key="index"
-          class="post-image-container"
-        >
-          <img
-            :src="getAvatarUrl(image)"
-            :alt="`图片 ${index + 1}`"
-            class="post-image"
-            @error="handleImageError($event, image)"
-            @load="handleImageLoad($event, image)"
-            @click="image && getAvatarUrl(image) && viewImage(getAvatarUrl(image)!)"
-          />
+        <div v-for="(image, index) in post.images" :key="index" class="post-image-container">
+          <img :src="getAvatarUrl(image)" :alt="`图片 ${index + 1}`" class="post-image"
+            @error="handleImageError($event, image)" @load="handleImageLoad($event, image)"
+            @click="image && getAvatarUrl(image) && viewImage(getAvatarUrl(image)!)" />
         </div>
       </div>
     </div>
 
     <!-- 帖子标签区域 -->
     <div v-if="post.tags && post.tags.length > 0" class="post-tags">
-      <el-tag
-        v-for="(tag, index) in post.tags"
-        :key="index"
-        size="small"
-        effect="light"
-      >
+      <el-tag v-for="(tag, index) in post.tags" :key="index" size="small" effect="light">
         {{ tag }}
       </el-tag>
     </div>
@@ -54,25 +35,23 @@
     <!-- 帖子统计区域 -->
     <div class="post-stats">
       <div class="stat-item" @click.stop="toggleLike">
-        <el-icon
-          class="stat-icon"
-          :class="{ liked: localLikeStatus.isLike === 1 }"
-        >
+        <el-icon class="stat-icon" :class="{ liked: localLikeStatus.isLike === 1 }">
           <Star />
         </el-icon>
-        <span
-          class="stat-text"
-          :class="{ 'liked-text': localLikeStatus.isLike === 1 }"
-        >
+        <span class="stat-text" :class="{ 'liked-text': localLikeStatus.isLike === 1 }">
           {{ localLikeStatus.likeCount }}
         </span>
       </div>
       <div class="stat-item">
-        <el-icon class="stat-icon"><View /></el-icon>
+        <el-icon class="stat-icon">
+          <View />
+        </el-icon>
         <span class="stat-text">{{ post.viewCount || 0 }}</span>
       </div>
       <div class="stat-item" @click.stop="toggleComments">
-        <el-icon class="stat-icon"><ChatDotRound /></el-icon>
+        <el-icon class="stat-icon">
+          <ChatDotRound />
+        </el-icon>
         <span class="stat-text">{{ post.commentCount || 0 }}</span>
       </div>
     </div>
@@ -81,36 +60,16 @@
     <div v-if="showComments" class="comments-section" @click.stop>
       <!-- 评论输入框 -->
       <div class="comment-input-area">
-        <el-avatar
-          :src="currentUserAvatar"
-          :size="32"
-          class="comment-input-avatar"
-          :icon="userIcon"
-        ></el-avatar>
+        <el-avatar :src="currentUserAvatar" :size="32" class="comment-input-avatar" :icon="userIcon"></el-avatar>
         <div class="comment-input-wrapper">
-          <el-input
-            v-model="commentText"
-            type="textarea"
-            placeholder="写下你的评论..."
-            :rows="2"
-            resize="none"
-            class="comment-input"
-          ></el-input>
+          <el-input v-model="commentText" type="textarea" placeholder="写下你的评论..." :rows="2" resize="none"
+            class="comment-input"></el-input>
           <div class="comment-input-actions">
-            <el-button
-              size="small"
-              @click.stop="submitAnonymousComment"
-              :disabled="!commentText.trim()"
-              style="margin-left: 8px; color: white"
-            >
+            <el-button size="small" @click.stop="submitAnonymousComment" :disabled="!commentText.trim()"
+              style="margin-left: 8px; color: white">
               匿名发送
             </el-button>
-            <el-button
-              type="primary"
-              size="small"
-              @click.stop="submitComment"
-              :disabled="!commentText.trim()"
-            >
+            <el-button type="primary" size="small" @click.stop="submitComment" :disabled="!commentText.trim()">
               发送
             </el-button>
           </div>
@@ -120,12 +79,8 @@
       <!-- 评论列表 -->
       <div class="comments-list">
         <div v-for="comment in comments" :key="comment.id" class="comment-item">
-          <el-avatar
-            :src="getAvatarUrl(comment.user.avatarUrl)"
-            :size="32"
-            class="comment-avatar"
-            :icon="userIcon"
-          ></el-avatar>
+          <el-avatar :src="getAvatarUrl(comment.user.avatarUrl)" :size="32" class="comment-avatar"
+            :icon="userIcon"></el-avatar>
           <div class="comment-content">
             <div class="comment-header">
               <div class="comment-user-wrapper">
@@ -140,20 +95,11 @@
             </div>
             <p class="comment-text">{{ comment.content }}</p>
             <div class="comment-actions">
-              <div
-                class="comment-action"
-                @click.stop="toggleCommentLike(comment)"
-              >
-                <el-icon
-                  class="comment-action-icon"
-                  :class="{ liked: comment.isLiked }"
-                >
+              <div class="comment-action" @click.stop="toggleCommentLike(comment)">
+                <el-icon class="comment-action-icon" :class="{ liked: comment.isLiked }">
                   <Star />
                 </el-icon>
-                <span
-                  class="comment-action-text"
-                  :class="{ 'liked-text': comment.isLiked }"
-                >
+                <span class="comment-action-text" :class="{ 'liked-text': comment.isLiked }">
                   {{ comment.likeCount || 0 }}
                 </span>
               </div>
@@ -164,38 +110,23 @@
 
             <!-- 回复输入框 -->
             <div v-if="replyingTo === comment.id" class="reply-input-area">
-              <el-input
-                v-model="replyText"
-                type="textarea"
-                :placeholder="`回复 ${comment.user.name}...`"
-                :rows="2"
-                resize="none"
-                class="reply-input"
-                :class="`reply-input-${comment.id}`"
-              ></el-input>
+              <el-input v-model="replyText" type="textarea" :placeholder="`回复 ${comment.user.name}...`" :rows="2"
+                resize="none" class="reply-input" :class="`reply-input-${comment.id}`"></el-input>
               <div class="reply-input-actions">
-                <el-button
-                  size="small"
-                  @click.stop="
-                    () => {
-                      console.log('取消按钮被点击，调用cancelReply');
-                      cancelReply();
-                    }
-                  "
-                >
+                <el-button size="small" @click.stop="
+                  () => {
+                    console.log('取消按钮被点击，调用cancelReply');
+                    cancelReply();
+                  }
+                ">
                   取消
                 </el-button>
-                <el-button
-                  type="primary"
-                  size="small"
-                  @click.stop="
-                    () => {
-                      console.log('发送回复按钮被点击，调用submitReply');
-                      submitReply(comment);
-                    }
-                  "
-                  :disabled="!replyText.trim()"
-                >
+                <el-button type="primary" size="small" @click.stop="
+                  () => {
+                    console.log('发送回复按钮被点击，调用submitReply');
+                    submitReply(comment);
+                  }
+                " :disabled="!replyText.trim()">
                   发送回复
                 </el-button>
               </div>
@@ -269,6 +200,19 @@ const props = defineProps<{
 
 // 创建路由实例
 const router = useRouter();
+
+// 跳转到用户主页
+const navigateToUserProfile = () => {
+  if (props.post.user && props.post.user.id) {
+    router.push({
+      path: `/user/${props.post.user.id}`,
+      query: {
+        name: props.post.user.name,
+        avatar: props.post.user.avatarUrl
+      }
+    });
+  }
+};
 
 // 默认用户图标
 const userIcon = computed(() => UserFilled);
@@ -367,7 +311,7 @@ const handleAvatarError = (event: Event) => {
 };
 
 // 图片加载成功处理
-const handleImageLoad = (_event: Event, _imageUrl: string) => {};
+const handleImageLoad = (_event: Event, _imageUrl: string) => { };
 
 // 查看大图功能
 const viewImage = (imageUrl: string) => {
@@ -913,22 +857,26 @@ const handleCardClick = () => {
   margin-right: 4px;
   font-size: 14px;
   transition: color 0.3s ease;
-  color: #666666; /* 默认颜色 */
+  color: #666666;
+  /* 默认颜色 */
 }
 
 /* 提高优先级，确保已点赞状态颜色正确显示 */
 .stat-item .stat-icon.liked {
-  color: #ff4d4f !important; /* 已点赞状态颜色，使用!important确保优先级 */
+  color: #ff4d4f !important;
+  /* 已点赞状态颜色，使用!important确保优先级 */
 }
 
 .stat-text {
   font-size: 14px;
-  color: #666666; /* 默认颜色 */
+  color: #666666;
+  /* 默认颜色 */
 }
 
 /* 提高优先级，确保已点赞状态文字颜色正确显示 */
 .stat-item .stat-text.liked-text {
-  color: #ff4d4f !important; /* 已点赞状态文字颜色，使用!important确保优先级 */
+  color: #ff4d4f !important;
+  /* 已点赞状态文字颜色，使用!important确保优先级 */
 }
 
 /* 评论区域样式 */
@@ -944,10 +892,59 @@ const handleCardClick = () => {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
   }
+}
+
+.clickable-avatar {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.clickable-avatar:hover {
+  opacity: 0.8;
+}
+
+.clickable-name {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.clickable-name:hover {
+  color: #009688;
+  text-decoration: underline;
+}
+
+/* 图片展示区域样式 */
+.post-images {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.post-image-container {
+  position: relative;
+  width: 80px;
+  height: 80px;
+  overflow: hidden;
+  border-radius: 4px;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+}
+
+.post-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  cursor: pointer;
+  transition: transform 0.2s ease;
+}
+
+.post-image:hover {
+  transform: scale(1.05);
 }
 
 /* 评论输入区域样式 */
@@ -1052,7 +1049,7 @@ const handleCardClick = () => {
 }
 
 .comment-reply-to {
-  font-size: 11.2px; /* 约为原字体的80% */
+  font-size: 11.2px;
   color: #999;
   opacity: 0.65;
   font-weight: normal;
@@ -1111,6 +1108,7 @@ const handleCardClick = () => {
   from {
     opacity: 0;
   }
+
   to {
     opacity: 1;
   }
@@ -1150,35 +1148,6 @@ const handleCardClick = () => {
 
 .reply-input-actions :deep(.el-button--primary:hover:not(:disabled)) {
   background: linear-gradient(135deg, #00a495 0%, #008c7e 100%);
-}
-
-/* 图片展示区域样式 */
-.post-images {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 8px;
-  margin-top: 12px;
-}
-
-.post-image-container {
-  position: relative;
-  width: 80px;
-  height: 80px;
-  overflow: hidden;
-  border-radius: 4px;
-  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
-}
-
-.post-image {
-  width: 100%;
-  height: 100%;
-  object-fit: cover;
-  cursor: pointer;
-  transition: transform 0.2s ease;
-}
-
-.post-image:hover {
-  transform: scale(1.05);
 }
 
 /* 响应式设计 */

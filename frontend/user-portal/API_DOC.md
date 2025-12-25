@@ -5,40 +5,46 @@
 ### 1. 发布帖子接口
 
 #### 接口描述
+
 用户发布新帖子，支持添加标题、内容、标签和图片。
 
 #### 接口信息
+
 - **接口名称**：发布帖子
 - **请求方法**：POST
-- **请求URL**：`/post/add`
+- **请求 URL**：`/post/add`
 
 #### 请求参数
-| 参数名 | 类型 | 是否必填 | 位置 | 描述 |
-|--------|------|----------|------|------|
-| title | String | 是 | Body | 帖子标题，长度2-100个字符 |
-| content | String | 是 | Body | 帖子内容，至少5个字符 |
-| isAnonymous | Integer | 是 | Body | 是否匿名发布，1表示匿名，0表示不匿名 |
-| status | Integer | 是 | Body | 帖子状态，固定为1 |
-| tags | Array<Integer> | 是 | Body | 标签ID数组，至少选择一个标签 |
-| images | Array<String> | 否 | Body | 图片URL数组，最多9张图片 |
+
+| 参数名      | 类型           | 是否必填 | 位置 | 描述                                   |
+| ----------- | -------------- | -------- | ---- | -------------------------------------- |
+| title       | String         | 是       | Body | 帖子标题，长度 2-100 个字符            |
+| content     | String         | 是       | Body | 帖子内容，至少 5 个字符                |
+| isAnonymous | Integer        | 是       | Body | 是否匿名发布，1 表示匿名，0 表示不匿名 |
+| status      | Integer        | 是       | Body | 帖子状态，固定为 1                     |
+| tags        | Array<Integer> | 是       | Body | 标签 ID 数组，至少选择一个标签         |
+| images      | Array<String>  | 否       | Body | 图片 URL 数组，最多 9 张图片           |
 
 #### 请求头
-| 字段名 | 类型 | 说明 | 示例值 |
-|--------|------|------|--------|
-| Content-Type | String | 请求内容类型 | application/json |
-| token | String | 用户认证令牌 |  eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... |
+
+| 字段名       | 类型   | 说明         | 示例值                                  |
+| ------------ | ------ | ------------ | --------------------------------------- |
+| Content-Type | String | 请求内容类型 | application/json                        |
+| token        | String | 用户认证令牌 | eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... |
 
 #### 响应状态码
-| 状态码 | 描述 | 说明 |
-|--------|------|------|
-| 200 | OK | 请求成功 |
-| 400 | Bad Request | 请求参数错误 |
-| 401 | Unauthorized | 用户未登录或登录已过期 |
-| 500 | Internal Server Error | 服务器内部错误 |
+
+| 状态码 | 描述                  | 说明                   |
+| ------ | --------------------- | ---------------------- |
+| 200    | OK                    | 请求成功               |
+| 400    | Bad Request           | 请求参数错误           |
+| 401    | Unauthorized          | 用户未登录或登录已过期 |
+| 500    | Internal Server Error | 服务器内部错误         |
 
 #### 响应数据格式
 
 ##### 成功响应
+
 ```json
 {
   "code": 1,
@@ -48,6 +54,7 @@
 ```
 
 ##### 失败响应
+
 ```json
 {
   "code": 0,
@@ -177,33 +184,39 @@ const uploadImage = async (file: File) => {
 ### 2. 文件上传接口
 
 #### 接口描述
+
 用于上传图片等文件，支持单文件上传。
 
 #### 接口信息
+
 - **接口名称**：文件上传
 - **请求方法**：POST
-- **请求URL**：`/upload`
+- **请求 URL**：`/upload`
 
 #### 请求参数
-| 参数名 | 类型 | 是否必填 | 位置 | 描述 |
-|--------|------|----------|------|------|
-| file | File | 是 | FormData | 要上传的文件，支持JPG和PNG格式，最大2MB |
+
+| 参数名 | 类型 | 是否必填 | 位置     | 描述                                         |
+| ------ | ---- | -------- | -------- | -------------------------------------------- |
+| file   | File | 是       | FormData | 要上传的文件，支持 JPG 和 PNG 格式，最大 2MB |
 
 #### 请求头
-| 字段名 | 类型 | 说明 | 示例值 |
-|--------|------|------|--------|
+
+| 字段名       | 类型   | 说明         | 示例值              |
+| ------------ | ------ | ------------ | ------------------- |
 | Content-Type | String | 请求内容类型 | multipart/form-data |
 
 #### 响应状态码
-| 状态码 | 描述 | 说明 |
-|--------|------|------|
-| 200 | OK | 请求成功 |
-| 400 | Bad Request | 请求参数错误 |
-| 500 | Internal Server Error | 服务器内部错误 |
+
+| 状态码 | 描述                  | 说明           |
+| ------ | --------------------- | -------------- |
+| 200    | OK                    | 请求成功       |
+| 400    | Bad Request           | 请求参数错误   |
+| 500    | Internal Server Error | 服务器内部错误 |
 
 #### 响应数据格式
 
 ##### 成功响应
+
 ```json
 {
   "code": 1,
@@ -215,6 +228,7 @@ const uploadImage = async (file: File) => {
 ```
 
 ##### 失败响应
+
 ```json
 {
   "code": 0,
@@ -223,41 +237,47 @@ const uploadImage = async (file: File) => {
 }
 ```
 
-## 日志记录相关接口文档
+## 日记记录相关接口文档
 
-## 1. 获取用户一年内日志记录日期列表
+## 1. 获取用户一年内日记记录日期列表
 
 ### 接口描述
-获取用户在指定年份内有写日志记录的所有日期，用于生成日志热力图日历。
+
+获取用户在指定年份内有写日记记录的所有日期，用于生成日记热力图日历。
 
 ### 接口信息
-- **接口名称**：获取用户日志记录日期
+
+- **接口名称**：获取用户日记记录日期
 - **请求方法**：GET
-- **请求URL**：`/api/diary/dates`
+- **请求 URL**：`/api/diary/dates`
 
 ### 请求参数
-| 参数名 | 类型 | 是否必填 | 位置 | 描述 |
-|--------|------|----------|------|------|
-| year | Integer | 否 | Query | 指定年份，默认为当前年份 |
-| user_id | Integer | 否 | Query | 用户ID，不提供时默认为当前登录用户 |
+
+| 参数名  | 类型    | 是否必填 | 位置  | 描述                                |
+| ------- | ------- | -------- | ----- | ----------------------------------- |
+| year    | Integer | 否       | Query | 指定年份，默认为当前年份            |
+| user_id | Integer | 否       | Query | 用户 ID，不提供时默认为当前登录用户 |
 
 ### 请求头
-| 字段名 | 类型 | 说明 | 示例值 |
-|--------|------|------|--------|
-| Content-Type | String | 请求内容类型 | application/json |
+
+| 字段名        | 类型   | 说明         | 示例值                                         |
+| ------------- | ------ | ------------ | ---------------------------------------------- |
+| Content-Type  | String | 请求内容类型 | application/json                               |
 | Authorization | String | 用户认证令牌 | Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... |
 
 ### 响应状态码
-| 状态码 | 描述 | 说明 |
-|--------|------|------|
-| 200 | OK | 请求成功 |
-| 401 | Unauthorized | 用户未认证 |
-| 403 | Forbidden | 用户无权限访问该资源 |
-| 500 | Internal Server Error | 服务器内部错误 |
+
+| 状态码 | 描述                  | 说明                 |
+| ------ | --------------------- | -------------------- |
+| 200    | OK                    | 请求成功             |
+| 401    | Unauthorized          | 用户未认证           |
+| 403    | Forbidden             | 用户无权限访问该资源 |
+| 500    | Internal Server Error | 服务器内部错误       |
 
 ### 响应数据格式
 
 #### 成功响应
+
 ```json
 {
   "code": 200,
@@ -269,7 +289,7 @@ const uploadImage = async (file: File) => {
       "2024-01-03",
       "2024-01-05",
       "2024-01-06",
-      "2024-01-08",
+      "2024-01-08"
       // ... 更多日期
     ],
     "total": 235
@@ -278,6 +298,7 @@ const uploadImage = async (file: File) => {
 ```
 
 #### 失败响应
+
 ```json
 {
   "code": 401,
@@ -287,16 +308,18 @@ const uploadImage = async (file: File) => {
 ```
 
 ### 字段说明
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| code | Integer | 响应状态码 |
-| message | String | 响应消息 |
-| data | Object | 响应数据 |
-| data.year | Integer | 请求的年份 |
-| data.dates | Array | 有日志记录的日期列表，格式为YYYY-MM-DD |
-| data.total | Integer | 日志记录总天数 |
+
+| 字段名     | 类型    | 说明                                    |
+| ---------- | ------- | --------------------------------------- |
+| code       | Integer | 响应状态码                              |
+| message    | String  | 响应消息                                |
+| data       | Object  | 响应数据                                |
+| data.year  | Integer | 请求的年份                              |
+| data.dates | Array   | 有日记记录的日期列表，格式为 YYYY-MM-DD |
+| data.total | Integer | 日记记录总天数                          |
 
 ### 请求示例
+
 ```http
 GET /api/diary/dates?year=2024 HTTP/1.1
 Host: example.com
@@ -304,43 +327,49 @@ Content-Type: application/json
 Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
-## 2. 获取用户一年内日志列表
+## 2. 获取用户一年内日记列表
 
 ### 接口描述
-获取用户在指定年份内的所有日志列表，支持分页。
+
+获取用户在指定年份内的所有日记列表，支持分页。
 
 ### 接口信息
-- **接口名称**：获取用户日志列表
+
+- **接口名称**：获取用户日记列表
 - **请求方法**：GET
-- **请求URL**：`/api/diary/list`
+- **请求 URL**：`/api/diary/list`
 
 ### 请求参数
-| 参数名 | 类型 | 是否必填 | 位置 | 描述 |
-|--------|------|----------|------|------|
-| year | Integer | 否 | Query | 指定年份，默认为当前年份 |
-| page | Integer | 否 | Query | 页码，默认为1 |
-| page_size | Integer | 否 | Query | 每页条数，默认为10 |
-| user_id | Integer | 否 | Query | 用户ID，不提供时默认为当前登录用户 |
-| sort_by | String | 否 | Query | 排序字段，可选值：date, title |
-| sort_order | String | 否 | Query | 排序方向，可选值：asc, desc，默认为desc |
+
+| 参数名     | 类型    | 是否必填 | 位置  | 描述                                     |
+| ---------- | ------- | -------- | ----- | ---------------------------------------- |
+| year       | Integer | 否       | Query | 指定年份，默认为当前年份                 |
+| page       | Integer | 否       | Query | 页码，默认为 1                           |
+| page_size  | Integer | 否       | Query | 每页条数，默认为 10                      |
+| user_id    | Integer | 否       | Query | 用户 ID，不提供时默认为当前登录用户      |
+| sort_by    | String  | 否       | Query | 排序字段，可选值：date, title            |
+| sort_order | String  | 否       | Query | 排序方向，可选值：asc, desc，默认为 desc |
 
 ### 请求头
-| 字段名 | 类型 | 说明 | 示例值 |
-|--------|------|------|--------|
-| Content-Type | String | 请求内容类型 | application/json |
+
+| 字段名        | 类型   | 说明         | 示例值                                         |
+| ------------- | ------ | ------------ | ---------------------------------------------- |
+| Content-Type  | String | 请求内容类型 | application/json                               |
 | Authorization | String | 用户认证令牌 | Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9... |
 
 ### 响应状态码
-| 状态码 | 描述 | 说明 |
-|--------|------|------|
-| 200 | OK | 请求成功 |
-| 401 | Unauthorized | 用户未认证 |
-| 403 | Forbidden | 用户无权限访问该资源 |
-| 500 | Internal Server Error | 服务器内部错误 |
+
+| 状态码 | 描述                  | 说明                 |
+| ------ | --------------------- | -------------------- |
+| 200    | OK                    | 请求成功             |
+| 401    | Unauthorized          | 用户未认证           |
+| 403    | Forbidden             | 用户无权限访问该资源 |
+| 500    | Internal Server Error | 服务器内部错误       |
 
 ### 响应数据格式
 
 #### 成功响应
+
 ```json
 {
   "code": 200,
@@ -354,27 +383,28 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
     "list": [
       {
         "id": 1,
-        "title": "示例日志标题 A",
-        "content": "这里是日志内容占位，未来接入后端数据。",
+        "title": "示例日记标题 A",
+        "content": "这里是日记内容占位，未来接入后端数据。",
         "date": "2024-01-01",
         "created_at": "2024-01-01T10:30:00Z",
         "updated_at": "2024-01-01T10:30:00Z"
       },
       {
         "id": 2,
-        "title": "示例日志标题 B",
-        "content": "这里是日志内容占位，未来接入后端数据。",
+        "title": "示例日记标题 B",
+        "content": "这里是日记内容占位，未来接入后端数据。",
         "date": "2024-01-03",
         "created_at": "2024-01-03T14:20:00Z",
         "updated_at": "2024-01-03T14:20:00Z"
-      },
-      // ... 更多日志项
+      }
+      // ... 更多日记项
     ]
   }
 }
 ```
 
 #### 失败响应
+
 ```json
 {
   "code": 401,
@@ -384,25 +414,27 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 ```
 
 ### 字段说明
-| 字段名 | 类型 | 说明 |
-|--------|------|------|
-| code | Integer | 响应状态码 |
-| message | String | 响应消息 |
-| data | Object | 响应数据 |
-| data.year | Integer | 请求的年份 |
-| data.total | Integer | 日志总条数 |
-| data.page | Integer | 当前页码 |
-| data.page_size | Integer | 每页条数 |
-| data.total_pages | Integer | 总页数 |
-| data.list | Array | 日志列表 |
-| data.list[].id | Integer | 日志ID |
-| data.list[].title | String | 日志标题 |
-| data.list[].content | String | 日志内容 |
-| data.list[].date | String | 日志日期，格式为YYYY-MM-DD |
-| data.list[].created_at | String | 创建时间，格式为ISO8601 |
-| data.list[].updated_at | String | 更新时间，格式为ISO8601 |
+
+| 字段名                 | 类型    | 说明                        |
+| ---------------------- | ------- | --------------------------- |
+| code                   | Integer | 响应状态码                  |
+| message                | String  | 响应消息                    |
+| data                   | Object  | 响应数据                    |
+| data.year              | Integer | 请求的年份                  |
+| data.total             | Integer | 日记总条数                  |
+| data.page              | Integer | 当前页码                    |
+| data.page_size         | Integer | 每页条数                    |
+| data.total_pages       | Integer | 总页数                      |
+| data.list              | Array   | 日记列表                    |
+| data.list[].id         | Integer | 日记 ID                     |
+| data.list[].title      | String  | 日记标题                    |
+| data.list[].content    | String  | 日记内容                    |
+| data.list[].date       | String  | 日记日期，格式为 YYYY-MM-DD |
+| data.list[].created_at | String  | 创建时间，格式为 ISO8601    |
+| data.list[].updated_at | String  | 更新时间，格式为 ISO8601    |
 
 ### 请求示例
+
 ```http
 GET /api/diary/list?year=2024&page=1&page_size=10&sort_by=date&sort_order=desc HTTP/1.1
 Host: example.com
@@ -412,30 +444,31 @@ Authorization: Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
 
 ## 3. 前端调用示例
 
-### 使用Fetch API调用
+### 使用 Fetch API 调用
 
-#### 获取日志记录日期列表
+#### 获取日记记录日期列表
+
 ```javascript
 // DiaryPage.vue 中调用示例
 async function fetchHasDataDates(year) {
   try {
     const response = await fetch(`/api/diary/dates?year=${year}`, {
-      method: 'GET',
+      method: "GET",
       headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
     });
-    
+
     const data = await response.json();
     if (data.code === 200) {
       return data.data.dates;
     } else {
-      console.error('获取日志日期失败:', data.message);
+      console.error("获取日记日期失败:", data.message);
       return [];
     }
   } catch (error) {
-    console.error('获取日志日期出错:', error);
+    console.error("获取日记日期出错:", error);
     return [];
   }
 }
@@ -447,28 +480,32 @@ const updateYear = async (year) => {
 };
 ```
 
-#### 获取日志列表
+#### 获取日记列表
+
 ```javascript
 // DiaryPage.vue 中调用示例
 async function fetchPosts(year, page = 1, pageSize = 10) {
   try {
-    const response = await fetch(`/api/diary/list?year=${year}&page=${page}&page_size=${pageSize}`, {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
+    const response = await fetch(
+      `/api/diary/list?year=${year}&page=${page}&page_size=${pageSize}`,
+      {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${localStorage.getItem("token")}`,
+        },
       }
-    });
-    
+    );
+
     const data = await response.json();
     if (data.code === 200) {
       return data.data.list;
     } else {
-      console.error('获取日志列表失败:', data.message);
+      console.error("获取日记列表失败:", data.message);
       return [];
     }
   } catch (error) {
-    console.error('获取日志列表出错:', error);
+    console.error("获取日记列表出错:", error);
     return [];
   }
 }
@@ -480,61 +517,63 @@ onMounted(async () => {
 });
 ```
 
-### 使用Axios调用（推荐）
+### 使用 Axios 调用（推荐）
 
-#### 获取日志记录日期列表
+#### 获取日记记录日期列表
+
 ```javascript
 // DiaryPage.vue 中调用示例
-import axios from 'axios';
+import axios from "axios";
 
 async function fetchHasDataDates(year) {
   try {
-    const response = await axios.get('/api/diary/dates', {
+    const response = await axios.get("/api/diary/dates", {
       params: { year },
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
     });
-    
+
     if (response.data.code === 200) {
       return response.data.data.dates;
     } else {
-      console.error('获取日志日期失败:', response.data.message);
+      console.error("获取日记日期失败:", response.data.message);
       return [];
     }
   } catch (error) {
-    console.error('获取日志日期出错:', error);
+    console.error("获取日记日期出错:", error);
     return [];
   }
 }
 ```
 
-#### 获取日志列表
+#### 获取日记列表
+
 ```javascript
 // DiaryPage.vue 中调用示例
 async function fetchPosts(year, page = 1, pageSize = 10) {
   try {
-    const response = await axios.get('/api/diary/list', {
-      params: { 
-        year, 
-        page, 
+    const response = await axios.get("/api/diary/list", {
+      params: {
+        year,
+        page,
         page_size: pageSize,
-        sort_by: 'date',
-        sort_order: 'desc'
+        sort_by: "date",
+        sort_order: "desc",
       },
       headers: {
-        'Authorization': `Bearer ${localStorage.getItem('token')}`
-      }
+        Authorization: `Bearer ${localStorage.getItem("token")}`,
+      },
     });
-    
+
     if (response.data.code === 200) {
       return response.data.data.list;
     } else {
-      console.error('获取日志列表失败:', response.data.message);
+      console.error("获取日记列表失败:", response.data.message);
       return [];
     }
   } catch (error) {
-    console.error('获取日志列表出错:', error);
+    console.error("获取日记列表出错:", error);
     return [];
   }
 }
@@ -542,15 +581,15 @@ async function fetchPosts(year, page = 1, pageSize = 10) {
 
 ## 4. 错误码说明
 
-| 错误码 | 说明 |
-|--------|------|
-| 200 | 操作成功 |
-| 400 | 请求参数错误 |
-| 401 | 用户未登录或登录已过期 |
-| 403 | 用户无权限访问该资源 |
-| 404 | 请求的资源不存在 |
-| 500 | 服务器内部错误 |
-| 501 | 该功能尚未实现 |
-| 502 | 网关错误 |
-| 503 | 服务暂时不可用 |
-| 504 | 网关超时 |
+| 错误码 | 说明                   |
+| ------ | ---------------------- |
+| 200    | 操作成功               |
+| 400    | 请求参数错误           |
+| 401    | 用户未登录或登录已过期 |
+| 403    | 用户无权限访问该资源   |
+| 404    | 请求的资源不存在       |
+| 500    | 服务器内部错误         |
+| 501    | 该功能尚未实现         |
+| 502    | 网关错误               |
+| 503    | 服务暂时不可用         |
+| 504    | 网关超时               |

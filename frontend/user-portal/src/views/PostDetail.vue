@@ -5,7 +5,9 @@
       <!-- 返回按钮 -->
       <div class="back-button-container">
         <el-button type="text" @click="goBack" class="back-button">
-          <el-icon><ArrowLeft /></el-icon>
+          <el-icon>
+            <ArrowLeft />
+          </el-icon>
           返回
         </el-button>
       </div>
@@ -14,15 +16,10 @@
       <div class="post-detail-card" v-if="postDetail">
         <!-- 用户信息区域 -->
         <div class="user-info">
-          <el-avatar
-            :src="getAvatarUrl(postDetail.avatar)"
-            :size="48"
-            class="user-avatar"
-            :icon="userIcon"
-            @error="handleAvatarError"
-          ></el-avatar>
+          <el-avatar :src="getAvatarUrl(postDetail.avatar)" :size="48" class="user-avatar clickable-avatar"
+            :icon="userIcon" @error="handleAvatarError" @click="navigateToUserProfile"></el-avatar>
           <div class="user-details">
-            <h3 class="user-name">{{ getUserName(postDetail) }}</h3>
+            <h3 class="user-name clickable-name" @click="navigateToUserProfile">{{ getUserName(postDetail) }}</h3>
             <p class="post-time">{{ formatTime(postDetail.createdAt) }}</p>
           </div>
         </div>
@@ -33,38 +30,18 @@
           <div class="post-text">{{ postDetail.content }}</div>
 
           <!-- 图片展示区域 -->
-          <div
-            v-if="postDetail.images && postDetail.images.length > 0"
-            class="post-images"
-          >
-            <div
-              v-for="(image, index) in postDetail.images"
-              :key="index"
-              class="post-image-container"
-            >
-              <img
-                :src="getAvatarUrl(image)"
-                :alt="`图片 ${index + 1}`"
-                class="post-image"
-                @error="handleImageError($event, image)"
-                @load="handleImageLoad($event, image)"
-                @click="getAvatarUrl(image) && viewImage(getAvatarUrl(image)!)"
-              />
+          <div v-if="postDetail.images && postDetail.images.length > 0" class="post-images">
+            <div v-for="(image, index) in postDetail.images" :key="index" class="post-image-container">
+              <img :src="getAvatarUrl(image)" :alt="`图片 ${index + 1}`" class="post-image"
+                @error="handleImageError($event, image)" @load="handleImageLoad($event, image)"
+                @click="getAvatarUrl(image) && viewImage(getAvatarUrl(image)!)" />
             </div>
           </div>
         </div>
 
         <!-- 帖子标签区域 -->
-        <div
-          v-if="postDetail.tags && postDetail.tags.length > 0"
-          class="post-tags"
-        >
-          <el-tag
-            v-for="(tag, index) in postDetail.tags"
-            :key="index"
-            size="large"
-            effect="light"
-          >
+        <div v-if="postDetail.tags && postDetail.tags.length > 0" class="post-tags">
+          <el-tag v-for="(tag, index) in postDetail.tags" :key="index" size="large" effect="light">
             {{ tag }}
           </el-tag>
         </div>
@@ -72,25 +49,23 @@
         <!-- 帖子统计区域 -->
         <div class="post-stats">
           <div class="stat-item" @click.stop="toggleLike">
-            <el-icon
-              class="stat-icon"
-              :class="{ liked: localLikeStatus.isLike === 1 }"
-            >
+            <el-icon class="stat-icon" :class="{ liked: localLikeStatus.isLike === 1 }">
               <Star />
             </el-icon>
-            <span
-              class="stat-text"
-              :class="{ 'liked-text': localLikeStatus.isLike === 1 }"
-            >
+            <span class="stat-text" :class="{ 'liked-text': localLikeStatus.isLike === 1 }">
               {{ localLikeStatus.likeCount }}
             </span>
           </div>
           <div class="stat-item">
-            <el-icon class="stat-icon"><View /></el-icon>
+            <el-icon class="stat-icon">
+              <View />
+            </el-icon>
             <span class="stat-text">{{ postDetail.viewCount || 0 }}</span>
           </div>
           <div class="stat-item" @click.stop="toggleComments">
-            <el-icon class="stat-icon"><ChatDotRound /></el-icon>
+            <el-icon class="stat-icon">
+              <ChatDotRound />
+            </el-icon>
             <span class="stat-text">{{ postDetail.commentCount || 0 }}</span>
           </div>
         </div>
@@ -106,36 +81,16 @@
 
           <!-- 评论输入框 -->
           <div class="comment-input-area">
-            <el-avatar
-              :src="currentUserAvatar"
-              :size="40"
-              class="comment-input-avatar"
-              :icon="userIcon"
-            ></el-avatar>
+            <el-avatar :src="currentUserAvatar" :size="40" class="comment-input-avatar" :icon="userIcon"></el-avatar>
             <div class="comment-input-wrapper">
-              <el-input
-                v-model="commentText"
-                type="textarea"
-                placeholder="写下你的评论..."
-                :rows="3"
-                resize="none"
-                class="comment-input"
-              ></el-input>
+              <el-input v-model="commentText" type="textarea" placeholder="写下你的评论..." :rows="3" resize="none"
+                class="comment-input"></el-input>
               <div class="comment-input-actions">
-                <el-button
-                  size="small"
-                  @click="submitAnonymousComment"
-                  :disabled="!commentText.trim()"
-                  style="margin-left: 8px; color: #ccc"
-                >
+                <el-button size="small" @click="submitAnonymousComment" :disabled="!commentText.trim()"
+                  style="margin-left: 8px; color: #ccc">
                   匿名发送
                 </el-button>
-                <el-button
-                  type="primary"
-                  size="small"
-                  @click="submitComment"
-                  :disabled="!commentText.trim()"
-                >
+                <el-button type="primary" size="small" @click="submitComment" :disabled="!commentText.trim()">
                   发送
                 </el-button>
               </div>
@@ -147,48 +102,28 @@
             <div v-if="comments.length === 0" class="no-comments">
               暂无评论，快来发表第一条评论吧！
             </div>
-            <div
-              v-for="comment in comments"
-              :key="comment.id"
-              class="comment-item"
-            >
-              <el-avatar
-                :src="getAvatarUrl(comment.user.avatarUrl)"
-                :size="40"
-                class="comment-avatar"
-                :icon="userIcon"
-              ></el-avatar>
+            <div v-for="comment in comments" :key="comment.id" class="comment-item">
+              <el-avatar :src="getAvatarUrl(comment.user.avatarUrl)" :size="40" class="comment-avatar"
+                :icon="userIcon"></el-avatar>
               <div class="comment-content">
                 <div class="comment-header">
                   <div class="comment-user-wrapper">
                     <span class="comment-user">{{ comment.user.name }}</span>
-                    <span
-                      v-if="comment.replyToUserName"
-                      class="comment-reply-to"
-                    >
+                    <span v-if="comment.replyToUserName" class="comment-reply-to">
                       回复 {{ comment.replyToUserName }}
                     </span>
                   </div>
                   <span class="comment-time">{{
                     formatTime(comment.createTime)
-                  }}</span>
+                    }}</span>
                 </div>
                 <p class="comment-text">{{ comment.content }}</p>
                 <div class="comment-actions">
-                  <div
-                    class="comment-action"
-                    @click.stop="toggleCommentLike(comment)"
-                  >
-                    <el-icon
-                      class="comment-action-icon"
-                      :class="{ liked: comment.isLiked }"
-                    >
+                  <div class="comment-action" @click.stop="toggleCommentLike(comment)">
+                    <el-icon class="comment-action-icon" :class="{ liked: comment.isLiked }">
                       <Star />
                     </el-icon>
-                    <span
-                      class="comment-action-text"
-                      :class="{ 'liked-text': comment.isLiked }"
-                    >
+                    <span class="comment-action-text" :class="{ 'liked-text': comment.isLiked }">
                       {{ comment.likeCount || 0 }}
                     </span>
                   </div>
@@ -199,25 +134,14 @@
 
                 <!-- 回复输入框 -->
                 <div v-if="replyingTo === comment.id" class="reply-input-area">
-                  <el-input
-                    v-model="replyText"
-                    type="textarea"
-                    :placeholder="`回复 ${comment.user.name}...`"
-                    :rows="2"
-                    resize="none"
-                    class="reply-input"
-                    :class="`reply-input-${comment.id}`"
-                  ></el-input>
+                  <el-input v-model="replyText" type="textarea" :placeholder="`回复 ${comment.user.name}...`" :rows="2"
+                    resize="none" class="reply-input" :class="`reply-input-${comment.id}`"></el-input>
                   <div class="reply-input-actions">
                     <el-button size="small" @click.stop="cancelReply">
                       取消
                     </el-button>
-                    <el-button
-                      type="primary"
-                      size="small"
-                      @click.stop="submitReply(comment)"
-                      :disabled="!replyText.trim()"
-                    >
+                    <el-button type="primary" size="small" @click.stop="submitReply(comment)"
+                      :disabled="!replyText.trim()">
                       发送回复
                     </el-button>
                   </div>
@@ -274,6 +198,19 @@ const userStore = useUserStore();
 
 // 默认用户图标
 const userIcon = computed(() => UserFilled);
+
+// 跳转到用户主页
+const navigateToUserProfile = () => {
+  if (postDetail.value && postDetail.value.userId) {
+    router.push({
+      path: `/user/${postDetail.value.userId}`,
+      query: {
+        name: getUserName(postDetail.value),
+        avatar: postDetail.value.avatar
+      }
+    });
+  }
+};
 
 // 帖子详情数据
 const postDetail = ref<any>(null);
@@ -969,6 +906,7 @@ onMounted(() => {
     opacity: 0;
     transform: translateY(-10px);
   }
+
   to {
     opacity: 1;
     transform: translateY(0);
@@ -1273,5 +1211,24 @@ onMounted(() => {
   .stat-item {
     margin-right: 0;
   }
+}
+
+.clickable-avatar {
+  cursor: pointer;
+  transition: opacity 0.2s;
+}
+
+.clickable-avatar:hover {
+  opacity: 0.8;
+}
+
+.clickable-name {
+  cursor: pointer;
+  transition: color 0.2s;
+}
+
+.clickable-name:hover {
+  color: #009688;
+  text-decoration: underline;
 }
 </style>
