@@ -22,7 +22,7 @@
         <java.version>17</java.version>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
-
+        <spring-ai-alibaba.version>1.1.0.0-RC1</spring-ai-alibaba.version>
         <!-- ✅ 升级到 3.5.8：解决 MyBatis 兼容性问题 -->
         <mybatis-plus.version>3.5.12</mybatis-plus.version>
     </properties>
@@ -113,6 +113,20 @@
             <artifactId>mybatis-spring-boot-starter-test</artifactId>
             <version>3.0.3</version>
             <scope>test</scope>
+        </dependency>
+
+        <!-- Agent Framework -->
+        <dependency>
+            <groupId>com.alibaba.cloud.ai</groupId>
+            <artifactId>spring-ai-alibaba-agent-framework</artifactId>
+            <version>${spring-ai-alibaba.version}</version>
+        </dependency>
+
+        <!-- DashScope Model -->
+        <dependency>
+            <groupId>com.alibaba.cloud.ai</groupId>
+            <artifactId>spring-ai-alibaba-starter-dashscope</artifactId>
+            <version>${spring-ai-alibaba.version}</version>
         </dependency>
     </dependencies>
 

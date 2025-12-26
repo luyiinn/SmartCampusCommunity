@@ -50,6 +50,24 @@
           rows="6"
           placeholder="说点什么..."
         />
+        <!-- AI优化按钮 -->
+        <div class="ai-optimize-container">
+          <el-tooltip
+            :content="aiOptimizationState.isOptimized ? '撤回优化' : 'AI优化'"
+            placement="top"
+            effect="dark"
+          >
+            <el-button
+              type="primary"
+              link
+              :loading="aiOptimizationState.isOptimizing"
+              @click="handleAIOptimize"
+              class="ai-optimize-btn"
+            >
+              <el-icon><MagicStick /></el-icon>
+            </el-button>
+          </el-tooltip>
+        </div>
       </el-form-item>
 
       <!-- 图片上传 -->
@@ -109,7 +127,7 @@ import { useTagStore } from "../stores/tagStore";
 import { useUserStore } from "../stores/userStore";
 import axios from "axios";
 import { ElMessage } from "element-plus";
-import { Plus, Delete, CircleClose } from "@element-plus/icons-vue";
+import { Plus, Delete, CircleClose, MagicStick } from "@element-plus/icons-vue";
 
 // 定义组件属性
 const props = defineProps<{
@@ -138,6 +156,13 @@ const formData = reactive({
   content: "",
   anonymous: false,
   images: [] as string[], // 新增图片字段，存储图片路径
+});
+
+// AI优化相关状态管理
+const aiOptimizationState = reactive({
+  originalContent: "", // 暂存原内容
+  isOptimized: false, // 是否已优化
+  isOptimizing: false, // 是否正在优化中
 });
 
 // 图片上传相关
@@ -247,6 +272,66 @@ const handleRemove = (file: any) => {
   const index = fileList.value.findIndex((f) => f.url === file.url);
   if (index !== -1) {
     fileList.value.splice(index, 1);
+  }
+};
+
+// 处理AI优化功能
+const handleAIOptimize = async () => {
+  try {
+    // 如果已经优化过，点击则撤回优化
+    if (aiOptimizationState.isOptimized) {
+      formData.content = aiOptimizationState.originalContent;
+      aiOptimizationState.isOptimized = false;
+      ElMessage.success("已撤回优化内容");
+      return;
+    }
+
+    // 检查是否有内容需要优化
+    if (!formData.content.trim()) {
+      ElMessage.warning("请先输入内容");
+      return;
+    }
+
+    // 设置优化中状态
+    aiOptimizationState.isOptimizing = true;
+
+    // 暂存原内容
+    aiOptimizationState.originalContent = formData.content;
+
+    // 发送请求到AI优化接口（直接发送字符串而不是JSON）
+    const response = await axios.post(
+      "/ai/copywrite",
+      formData.content.trim(),
+      {
+        headers: {
+          token: ` ${userStore.token}`,
+          "Content-Type": "text/plain",
+        },
+      }
+    );
+
+    // 处理响应
+    if (response.data && response.data.code === 1) {
+      // 将优化后的内容放入内容框
+      formData.content = response.data.data;
+      // 更新状态
+      aiOptimizationState.isOptimized = true;
+      ElMessage.success("内容优化完成");
+    } else {
+      ElMessage.error(response.data?.msg || "优化失败");
+      // 恢复原内容
+      formData.content = aiOptimizationState.originalContent;
+      aiOptimizationState.isOptimized = false;
+    }
+  } catch (error) {
+    console.error("AI优化失败:", error);
+    ElMessage.error("优化失败，请重试");
+    // 恢复原内容
+    formData.content = aiOptimizationState.originalContent;
+    aiOptimizationState.isOptimized = false;
+  } finally {
+    // 重置优化中状态
+    aiOptimizationState.isOptimizing = false;
   }
 };
 
@@ -517,6 +602,35 @@ const resetForm = () => {
 .error-message-fade-leave-to {
   opacity: 0;
   transform: translateY(-10px);
+}
+
+/* AI优化按钮样式 */
+.ai-optimize-container {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 8px;
+}
+
+.ai-optimize-btn {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  color: #67c23a !important;
+}
+
+.ai-optimize-btn:hover {
+  color: #85ce61 !important;
+}
+
+.ai-optimize-btn:disabled {
+  color: #c0c4cc !important;
+  cursor: not-allowed;
+}
+
+/* 放大AI图标 */
+.ai-optimize-btn .el-icon {
+  font-size: 16px !important;
 }
 
 /* 覆盖Element Plus的上传组件样式 - 使用更具体的选择器和更高优先级 */
